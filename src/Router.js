@@ -12,7 +12,6 @@ const Router = () => {
     else setRouteState("main");
   },[ isSignedIn ])
   
-
   return (
     <>
       {routeState == "authScreen" && <AuthScreen/>} 
