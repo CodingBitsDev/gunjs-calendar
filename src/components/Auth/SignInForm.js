@@ -1,20 +1,26 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { useForm } from "react-hook-form";
 
 const SignInForm = ({ onSignIn }) => {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { setFocus, register, handleSubmit, watch, formState: { errors } } = useForm();
+
+  useEffect(() => {
+    setFocus("name");
+  }, [setFocus]);
 
   return (
     <>
       <form 
-        className="mb-5"
+        className="flex flex-col w-full items-end"
         onSubmit={handleSubmit(({name, pw}) => {
           onSignIn(name, pw)
         })}
       >
-        <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" placeholder="Name" {...register("name")}/>
-        <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" type="password" placeholder="Passphrase" {...register("pw")}/>
-        <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" type="submit" value="sign in"/>
+        <div>
+          <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" placeholder="Name" {...register("name")}/>
+          <input className="bg-black p-2 rounded  text-white placeholder-gray-100" type="password" placeholder="Passphrase" {...register("pw")}/>
+        </div>
+        <input className="bg-black mt-5 p-2 rounded text-white placeholder-gray-100" type="submit" value="sign in"/>
       </form>
     </>
   )

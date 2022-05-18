@@ -32,7 +32,14 @@ export default function useGunAuth(persist){
 
   let recall = useCallback((pin) => {
     if(isSignedIn) return gun.user();
-    gunRecall(pin)
+    gunRecall(pin).then(result => {
+      if(result.err) return setError(result.err);
+    })
+
+  },[isSignedIn])
+
+  let resetError = useCallback(() => {
+    setError("")
   },[isSignedIn])
 
   useEffect(() => {
@@ -44,5 +51,5 @@ export default function useGunAuth(persist){
     })
   },[])
 
-  return { showPin, isSignedIn, error, signIn, signUp, recall }
+  return { showPin, isSignedIn, error, signIn, signUp, recall, resetError }
 }

@@ -13,6 +13,7 @@ export function recall(pin){
     const gun_auth = localStorage.getItem('gun_auth');
     if (!gun_auth) return;
     let auth = await SEA.decrypt(gun_auth, pin);
+    if(!auth?.name || !auth?.pw) return resolve({err: "Pin Incorrect"})
     signIn(auth.name, auth.pw, false).then((result) => {
       //{err} || user
       resolve(result)
