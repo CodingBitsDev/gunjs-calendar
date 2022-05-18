@@ -19,7 +19,7 @@ export default function useGunAuth(persist){
     })
   },[isSignedIn])
 
-  let signIn = useCallback((name, password, persist) => {
+  let signIn = useCallback((name, password, persist = true) => {
     gunSignIn(name, password, persist).then((result) =>{
       if(isSignedIn) return gun.user();
       if(result.err) return setError(result.err);
