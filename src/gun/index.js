@@ -12,8 +12,8 @@ require('gun/lib/unset.js')
 
 // let knownGunServer = ["http://localhost:1337/gun", "https://gun-manhattan.herokuapp.com/gun"]
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
-// let knownGunServer = undefined
-const gun = GUN();
+const gun = GUN(["https://gun.nilsr.me/gun"]);
+
 gun.getValAsync = (keyPath, startNode) => new Promise(res => {
     let keys = ( keyPath || "" ).split(".");
 
@@ -49,7 +49,14 @@ gun.trashNode = (node) => new Promise(res => {
     gun.user().get("trash").set(node)
     node.put(null)
 })
+gun.userAppRoot = () => {
+    return gun.user().get(APP_KEY)
+}
+gun.publicAppRoot = () => {
+    return gun.get(APP_KEY)
+}
 
 export default gun; 
+export const APP_KEY = "gun-calendar"
 
 window.gun = gun;

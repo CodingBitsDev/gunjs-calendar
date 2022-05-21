@@ -35,7 +35,6 @@ export default function useGunAuth(persist){
     gunRecall(pin).then(result => {
       if(result.err) return setError(result.err);
     })
-
   },[isSignedIn])
 
   let resetError = useCallback(() => {

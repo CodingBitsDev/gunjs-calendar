@@ -55,12 +55,13 @@ export function onSignedIn(cb){
 
 function persistUser(name, pw, pin){
   return new Promise(async (resolve) => {
-    let savedPin = await gun.user().get("auth_pin").once()
-    let pinNumber = !isNaN(Number(pin)) ? Number(pin) : savedPin;
+    let savedPin = await gun.getValAsync("auth_pin", gun.userAppRoot())
+    let pinNumber = !isNaN(parseFloat(pin)) ? parseFloat(pin) : savedPin;
     if(!pinNumber) return resolve(true);
-    if(!savedPin){
-      await gun.user().get("auth_pin").set(pinNumber);
+    if(!savedPin || true){
+      await gun.userAppRoot().get("auth_pin").put(pinNumber);
     }
+    console.log("###", pin, pinNumber, savedPin)
     let authData = await SEA.encrypt({name,pw: pw}, pinNumber)
     localStorage.setItem("gun_auth", authData);
     resolve(true);
