@@ -3,6 +3,24 @@ import SEA from "gun/sea"
 
 const signInListener = new Set()
 
+export function restoreSession(){
+  return new Promise((resolve) => {
+    if(gun.user().is) return resolve(true)
+    //check if there is a session to restore
+    if (window.sessionStorage.recall) {
+      //we have a session to restore so lets restore it
+      gun.user().recall({ sessionStorage: true }, function(res) {
+        if (!res.err) { resolve(true) }
+        else resolve({err: res.err})
+      })
+    } else {
+      //Rgere was no session to restore
+      gun.user().recall({ sessionStorage: true });
+      resolve(false)
+    }
+  })
+}
+
 export function canRecall(){
   const gun_auth = localStorage.getItem('gun_auth');
   return !!gun_auth;
@@ -61,7 +79,6 @@ function persistUser(name, pw, pin){
     if(!savedPin || true){
       await gun.userAppRoot().get("auth_pin").put(pinNumber);
     }
-    console.log("###", pin, pinNumber, savedPin)
     let authData = await SEA.encrypt({name,pw: pw}, pinNumber)
     localStorage.setItem("gun_auth", authData);
     resolve(true);

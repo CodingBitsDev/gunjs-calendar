@@ -1,9 +1,9 @@
 import React, {useEffect, useCallback, useState} from "react";
 import gun from "..";
 
-import { canRecall, signIn as gunSignIn, signUp as gunSignup, recall as gunRecall, onSignedIn } from "../auth";
+import { restoreSession ,canRecall, signIn as gunSignIn, signUp as gunSignup, recall as gunRecall, onSignedIn } from "../auth";
 
-export default function useGunAuth(persist){
+export default function useGunAuth(persist, keepSession){
   let [ isSignedIn, setIsSignedIn ] = useState(false);
   let [ error, setError ] = useState("");
   let [ showPin, setShowPin ] = useState(false);
@@ -42,12 +42,18 @@ export default function useGunAuth(persist){
   },[isSignedIn])
 
   useEffect(() => {
-    setShowPin(canRecall())
-    onSignedIn((signedIn) => { 
-      setIsSignedIn(signedIn)
-      setShowPin(false);
-      setError("")
-    })
+    restoreSession().then((result) => {
+      if(result === true) {
+        return setIsSignedIn(true)
+      };
+      if(result !== false) console.warn("Problem in recall", result?.err)
+      setShowPin(canRecall())
+      onSignedIn((signedIn) => { 
+        setIsSignedIn(signedIn)
+        setShowPin(false);
+        setError("")
+      })
+    });
   },[])
 
   return { showPin, isSignedIn, error, signIn, signUp, recall, resetError }

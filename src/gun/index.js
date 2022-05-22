@@ -9,7 +9,6 @@ import "gun/lib/store"
 import "gun/lib/rindexed"
 
 require('gun/lib/unset.js')
-
 // let knownGunServer = ["http://localhost:1337/gun", "https://gun-manhattan.herokuapp.com/gun"]
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
 const gun = GUN(["https://gun.nilsr.me/gun"]);
@@ -27,11 +26,12 @@ gun.getValAsync = (keyPath, startNode) => new Promise(res => {
     keys.forEach(key => {
         node = node.get(key)
     })
-    console.log("data", node)
-    return node.once((data) => {
+    node.once((data) => {
         return res(data)
     })
+    setTimeout(() => {res({err:`Could not fetch ${keyPath}(0) from ${startNode}(1)`, errData:[keyPath, startNode]})},5000)
 })
+
 gun.getUser = (alias) => {
     return new Promise(async resolve => {
         if (!alias) return resolve([ undefined, undefined ]);
