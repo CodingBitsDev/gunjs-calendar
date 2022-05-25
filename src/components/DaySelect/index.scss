@@ -1,0 +1,19 @@
+:root {
+  /* Day Select*/
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #5350ff;
+  --rdp-background-color: #333333;
+  /* Switch to dark colors for dark themes */
+  --rdp-accent-color-dark: #12005a52;
+  --rdp-background-color-dark: #000000;
+  /* Outline border for focused elements */
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  /* Outline border for focused and selected elements */
+  --rdp-outline-selected: 2px solid rgba(0, 0, 0, 0.75);
+
+  // /* Time Select */ 
+  --time-picker-primary-color: #5350ff
+}
+.rdp{
+  color: white;
+}
