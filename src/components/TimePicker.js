@@ -29,7 +29,7 @@ const useStyles = createUseStyles(
       },
     },
     control__svg: {
-      stroke: "var(--time-picker-primary-color)",
+      stroke: "#ffffff",
     },
     wrapper: {
       position: "relative",
@@ -44,7 +44,7 @@ const useStyles = createUseStyles(
     selector: {
       width: "100%",
       height: "40px",
-      backgroundColor: "var(--time-picker-primary-color)",
+      backgroundColor: "#5350ff",
       position: "absolute",
       top: "39px",
       borderRadius: "8px",
@@ -61,7 +61,7 @@ const useStyles = createUseStyles(
     },
     time: {
       zIndex: "1",
-      color: "var(--time-picker-primary-color)",
+      color: "#ffffff",
       opacity: "0.5",
       transition: "color 0.5s",
     },
