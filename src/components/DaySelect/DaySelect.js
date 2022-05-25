@@ -71,7 +71,7 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
             {...register("day")}
           />
           { showDayPicker && (
-            <div className="absolute bg-black top-6 border-2 border-white rounded-xl rounded-tl-none transform">
+            <div className="absolute z-10 bg-black top-6 border-2 border-white rounded-xl rounded-tl-none transform">
               <DayPicker
                 mode="single"
                 selected={day}
@@ -89,7 +89,7 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
             readOnly
             {...register("time")}
           />
-          <div className={`absolute bg-black top-18 right-6 border-2 border-white rounded-xl rounded-tr-none ${!showTimePicker ? "hidden" : ""}`}>
+          <div className={`absolute z-10 bg-black top-18 right-6 border-2 border-white rounded-xl rounded-tr-none ${!showTimePicker ? "hidden" : ""}`}>
             <TimePicker 
               defaultValue={getHourString(day.getHours(), day.getMinutes())}
               onChange={setTimeVal}
