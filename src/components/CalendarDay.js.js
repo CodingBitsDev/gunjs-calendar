@@ -34,7 +34,7 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       let startMinute = (new Date(hour.start)).getMinutes()
       let endHour = (new Date(hour.end)).getHours()
       let endMinute = (new Date(hour.end)).getMinutes()
-      let affectedHours = hours.slice(startHour-1, endHour-1)
+      let affectedHours = endMinute ? hours.slice(startHour-1, endHour) : hours.slice(startHour-1, endHour-1) 
 
       let startRef = affectedHours[0].getRef()
       let endRef = affectedHours[affectedHours.length -1].getRef()
@@ -48,9 +48,11 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       hoursComponents.push(
         <div 
           className="absolute opacity-60 cursor-pointer"
-          style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.who || "") }}
-          data-tip={`Who: ${hour.who}<br/>Start:${getHourString(startHour, startMinute)}<br/>End: ${getHourString(endHour, endMinute)}`}
+          style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.what || "") }}
+          data-tip={`What: ${hour.what}<br/>Start:${getHourString(startHour, startMinute)}<br/>End: ${getHourString(endHour, endMinute)}`}
+          onClick={hourClicked}
         >
+          <ReactTooltip type={"dark"} multiline effect="float" border />
         </div>
       )
     })
@@ -78,12 +80,10 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
           lastWeek={last}
           lastHour={index === hours.length -1}
           onClickFree={() => {onClickFree && onClickFree(currentHour)}}
-          isCurrentDay={isCurrentDay}
         />
       )
     })} 
     {hoursComponents}
-    <ReactTooltip type={"dark"} multiline effect="float" border />
   </div>;
 }
 

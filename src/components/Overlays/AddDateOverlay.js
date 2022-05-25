@@ -3,38 +3,52 @@ import { DayPicker } from 'react-day-picker';
 import { useForm } from "react-hook-form";
 import DaySelect from "../DaySelect/DaySelect";
 
-function AddDateOverlay({ startDate, endDate, who}){
-  let [start, setStart] = useState(new Date(startDate || Date.now()))
+function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit}){
+  console.log(startDate, endDate)
+  let [start, setStart] = useState(new Date(startDate))
   let [end, setEnd] = useState(new Date(endDate || Date.now()))
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
 
-  useEffect(() => {
-    setValue("start", start.toUTCString())
-  })
-
-  const setStartVal = (val, val2) => {
-    console.log("### val", val, val2)
-    setValue("start", val.toUTCString)
-    setStart(val)
+  const onSubmit = (data) => {
+    onSave?.(start, end, data.name)
   }
 
-  console.log("###", start, end, startDate, endDate)
+  const cancle = () => {
+    onCancle()
+  }
+
+  const deletePressed  = () => {
+    onDelete?.();
+  }
 
   return (
-    <form className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
+    <form onSubmit={handleSubmit(onSubmit)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
+      <label className="text-white font-bold mb-2">Name</label>
+      <input required className="mb-5 px-2 rounded-md outline-none" placeholder="Name" defaultValue={name || ""} type={"text"} {...register("name")}/>
       <DaySelect 
         className={`mb-4 -mt-2`}
         title={"Start"}
-        startDate={start}
+        defaultValue={start}
         onSetDay={setStart}
       />
-      {<DaySelect title={"End"} startDate={end} onSetDay={setEnd}/>}
-      <button 
-        className="bg-blue-700"
-        stype="submit"
-      >
-        Save
-      </button>
+      {<DaySelect title={"End"} defaultValue={end} onSetDay={setEnd}/>}
+      <div className="mt-6 flex">
+        { isEdit && (
+          <button onClick={deletePressed} className="bg-red-600 rounded-md grow mr-4" > Remove </button>
+        )}
+        <button 
+          className="bg-yellow-500 rounded-md grow mr-4"
+          onClick={cancle}
+        >
+          Cancle
+        </button>
+        <button 
+          className="bg-blue-700 rounded-md grow"
+          type="submit"
+        >
+          Save
+        </button>
+      </div>
     </form>
   );
   return null;

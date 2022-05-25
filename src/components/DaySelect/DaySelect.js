@@ -5,6 +5,11 @@ import "./index.scss"
 import { useForm } from "react-hook-form";
 import TimePicker from "../TimePicker";
 
+let minuteExclude = []
+for (let index = 0; index < 60; index++) {
+  if(index % 5 != 0) minuteExclude.push(index)
+}
+
 
 function DaySelect({ title, defaultValue, onSetDay, className}){
   let [day, setDay] = useState(new Date(defaultValue || Date.now()))
@@ -13,7 +18,8 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
 
   useEffect(() => {
-    let dayString = day.toUTCString().split(" ").slice(0,-2).join(" ");
+    console.log("### newDay", getDayString(day))
+    let dayString = getDayString(day)
     setValue("day", dayString)
     setValue("time", getHourString(day.getHours(), day.getMinutes()))
     onSetDay?.(day) 
@@ -35,10 +41,10 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
   const setDayVal = (val) => {
     if(val) {
 
-      // let newDay = new Date(val);
-      // newDay.setHours(day.getHours())
-      // newDay.setMinutes(day.getMinutes())
-      // setDay(newDay)
+      let newDay = new Date(val);
+      newDay.setHours(day.getHours())
+      newDay.setMinutes(day.getMinutes())
+      setDay(newDay)
     }
     setShowDayPicker(false)
   }
@@ -87,6 +93,8 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
             <TimePicker 
               defaultValue={getHourString(day.getHours(), day.getMinutes())}
               onChange={setTimeVal}
+              minuteExclude={minuteExclude}
+              notShowExclude
             />
           </div>
         </div>
@@ -104,4 +112,18 @@ function getHourString(hour, minute){
   if(!minute) hourString += "00";
   else hourString += Number(minute) > 9 ? minute : "0" + minute
   return hourString;
+}
+
+function getDayString(date){
+  let day = date.getDate();
+  let month = date.getMonth();
+  let weekDays = date.getDay()
+
+  let dayString = "";
+  dayString += day > 9 ? day : "0" + day
+  dayString += ".";
+  dayString += month > 9 ? month : "0" + month
+  dayString += ".";
+  dayString += date.getFullYear()
+  return dayString;
 }
