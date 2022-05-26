@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { DayPicker } from 'react-day-picker';
 import { useForm } from "react-hook-form";
+import useGunValue from "../../gun/hooks/useGunValue";
 import DaySelect from "../DaySelect/DaySelect";
 
 function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit}){
-  console.log(startDate, endDate)
   let [start, setStart] = useState(new Date(startDate))
   let [end, setEnd] = useState(new Date(endDate || Date.now()))
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();

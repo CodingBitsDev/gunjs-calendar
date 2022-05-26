@@ -91,12 +91,13 @@ gun.addListener = (path, listener) => {
 gun.removeListener = (path, listener) => {
     //Get Current Listeners for path
     let listenerList = gun.listenerMap.get(path) || []
+    if(!listenerList.length) return;
     let newList = listenerList.filter((l) => l != listener)
     gun.listenerMap.set(path, newList)
     let isLastListener = !newList.length;
 
     if(isLastListener){
-        gun.getNodeByPath().off();
+        gun.getNodeByPath(path).off();
     } 
 }
 
