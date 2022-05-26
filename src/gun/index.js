@@ -13,19 +13,40 @@ require('gun/lib/unset.js')
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
 const gun = GUN(["https://gun.nilsr.me/gun"]);
 
+gun.trashNode = (node) => new Promise(res => {
+    gun.user().get("trash").set(node)
+    node.put(null)
+})
+gun.userAppRoot = () => {
+    return gun.user().get(APP_KEY)
+}
+gun.publicAppRoot = () => {
+    return gun.get(APP_KEY)
+}
+gun.getNodeByPath = (path) => {
+    let pathSplit = path.split(".")
+    let isUserRoot = pathSplit[0] == "user";
+    let isPublicRoot = pathSplit[0] == "public";
+    let node = isUserRoot ?  gun.userAppRoot() : isPublicRoot ? gun.publicAppRoot() : gun;
+    for (let index = isUserRoot ? 1 : 0; index < pathSplit.length; index++) {
+        node = node.get(pathSplit[index]) 
+    }
+    return node;
+}
+
 gun.getValAsync = (keyPath, startNode) => new Promise(res => {
     let keys = ( keyPath || "" ).split(".");
 
     let node 
     if (!keyPath && !startNode) return res(undefined);
-    else if (!keyPath && startNode) node = startNode;
-    else {
-        node = (startNode || gun).get(keys[0])
+    if(startNode) {
+        node = startNode;
+        for (let i = 0; i < keys.length; i++) {
+            node = node.get(keys[i])
+        }
+    } else {
+        node = gun.getNodeByPath(keyPath)
     }
-    keys = keys.splice(1)
-    keys.forEach(key => {
-        node = node.get(key)
-    })
     node.once((data) => {
         return res(data)
     })
@@ -45,16 +66,40 @@ gun.getUser = (alias) => {
         })
     })
 }
-gun.trashNode = (node) => new Promise(res => {
-    gun.user().get("trash").set(node)
-    node.put(null)
-})
-gun.userAppRoot = () => {
-    return gun.user().get(APP_KEY)
+
+//Better Listener handling since the off() function removes all listeners instead of just one
+gun.listenerMap = new Map();
+gun.valueMap = new Map();
+gun.addListener = (path, listener) => {
+    //Get Current Listeners for path
+    let listenerList = gun.listenerMap.get(path) || []
+    let isNewPath = !listenerList.length;
+    //Add New Listener
+    gun.listenerMap.set(path, [...listenerList, listener])
+    if(isNewPath){
+        gun.getNodeByPath(path).on((value, key, _msg, _ev) => {
+            gun.valueMap.set(path, [value, key, _msg, _ev])
+            gun.listenerMap.get(path).forEach(l => l(value, key, _msg, _ev))
+        })
+    } else {
+        let currentVal = gun.valueMap.get(path)
+        if(currentVal){
+            listener(...currentVal)
+        }
+    }
 }
-gun.publicAppRoot = () => {
-    return gun.get(APP_KEY)
+gun.removeListener = (path, listener) => {
+    //Get Current Listeners for path
+    let listenerList = gun.listenerMap.get(path) || []
+    let newList = listenerList.filter((l) => l != listener)
+    gun.listenerMap.set(path, newList)
+    let isLastListener = !newList.length;
+
+    if(isLastListener){
+        gun.getNodeByPath().off();
+    } 
 }
+
 
 export default gun; 
 export const APP_KEY = "gun-calendar"
