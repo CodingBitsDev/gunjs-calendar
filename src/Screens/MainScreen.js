@@ -4,6 +4,8 @@ import Header from "../components/Header";
 import CalendarWeek from "../components/CalendarWeek";
 import useOverlay from "../hooks/useOverlay";
 import AddDateOverlay from "../components/Overlays/AddDateOverlay";
+import { useDispatch } from "react-redux";
+import { initGunData } from "../redux/reducer/gunData";
 
 let week = [
   { date:"05.22.2022", hours : [{start: "05.22.2022 10:00", end: "05.22.2022 12:30", what: "Bjoern"}]},
@@ -16,12 +18,14 @@ let week = [
 ]
 
 const MainScreen = () => {
+  let dispatch = useDispatch()
+  dispatch(initGunData())
+
   let [overlay, setOverlay] = useOverlay();
   const clickFree = (date) => {
     let start = new Date(date)
     let end = new Date(date)
     end.setHours(end.getHours()+1)
-    console.log("### dates", start, end)
     let onSave = () => {
       setOverlay(null)
       //TODO

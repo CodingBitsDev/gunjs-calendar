@@ -8,9 +8,9 @@ export default function useGunAuth(persist, keepSession){
   let [ error, setError ] = useState("");
   let [ showPin, setShowPin ] = useState(false);
 
-  let signUp = useCallback((name, password, pin) => {
+  let signUp = useCallback((name, password, username, pin) => {
     if(isSignedIn) return gun.user();
-    gunSignup(name, password, !!persist && pin).then((result) => {
+    gunSignup(name, password, username, !!persist && pin).then((result) => {
       if(result.err) return setError(result.err);
       setError("")
       setIsSignedIn(true);

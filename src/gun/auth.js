@@ -39,15 +39,21 @@ export function recall(pin){
   })
 }
 
-export async function signUp(name, pw, pin){
+export async function signUp(name, pw, userName, pin){
   return new Promise(async (resolve) => {
     gun.user().create(name, pw, async ({ ok, pub, err }) => {
       if(err) return resolve({ err })
       if(ok == 0 && pub){
-        resolve(await signIn(name, pw, pin))
+        let signInResult = await signIn(name, pw, pin)
+        if(userName) await setUserName(userName);
+        resolve(signInResult)
       } 
     })
   }); 
+}
+
+export async function setUserName(userName){
+  await gun.userAppRoot().get("name").put(userName);
 }
 
 export function signIn(name, pw, persist){
@@ -74,10 +80,12 @@ export function onSignedIn(cb){
 function persistUser(name, pw, pin){
   return new Promise(async (resolve) => {
     let savedPin = await gun.getValAsync("auth_pin", gun.userAppRoot())
+    if(savedPin) savedPin = await gun.decryptUser(savedPin);
+
     let pinNumber = !isNaN(parseFloat(pin)) ? parseFloat(pin) : savedPin;
     if(!pinNumber) return resolve(true);
-    if(!savedPin || true){
-      await gun.userAppRoot().get("auth_pin").put(pinNumber);
+    if(!savedPin){
+      await gun.userAppRoot().get("auth_pin").put(await gun.encryptUser(pinNumber));
     }
     let authData = await SEA.encrypt({name,pw: pw}, pinNumber)
     localStorage.setItem("gun_auth", authData);

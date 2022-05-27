@@ -12,8 +12,8 @@ const SignUpForm = ({ onSignUp }) => {
     <>
       <form 
         className=""
-        onSubmit={handleSubmit(({name, pw, pin}) => {
-          onSignUp(name, pw, pin)
+        onSubmit={handleSubmit(({name, pw, pin, alias}) => {
+          onSignUp(name, pw, alias, pin)
         })}
       >
         <div>
@@ -21,7 +21,10 @@ const SignUpForm = ({ onSignUp }) => {
           <input className="bg-black p-2 rounded text-white placeholder-gray-100" type="password" placeholder="Passphrase" {...register("pw")}/>
         </div>
         <div className="flex mt-5">
-          <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" type="Pin" placeholder="Pin" {...register("pin")}/>
+          <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" type="Alias" placeholder="Alias" {...register("alias")}/>
+          <input className="bg-black p-2 rounded text-white placeholder-gray-100" type="Pin" placeholder="Pin" {...register("pin")}/>
+        </div>
+        <div className="flex mt-5">
           <div className="grow"/>
           <input className="bg-black p-2 rounded text-white placeholder-gray-100" type="submit" value="Sign Up"/>
         </div>

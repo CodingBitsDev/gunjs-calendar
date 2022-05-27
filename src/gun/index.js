@@ -3,6 +3,7 @@ import SEA from "gun/sea"
 import "gun/lib/yson.js";
 import "gun/lib/dom.js"
 import "gun/lib/upload.js"
+import "gun/lib/load.js";
 import "gun/lib/radix"
 import "gun/lib/radisk"
 import "gun/lib/store"
@@ -13,6 +14,15 @@ require('gun/lib/unset.js')
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
 const gun = GUN(["https://gun.nilsr.me/gun"]);
 
+gun.encryptUser = async (data) => {
+    let keyPair = gun.user()._.sea
+    return await SEA.encrypt(data, keyPair)
+}
+gun.decryptUser = async (data) => {
+    let keyPair = gun.user()._.sea
+    if(!( data + "" ).startsWith("SEA")) return data
+    return await SEA.decrypt(data, keyPair)
+}
 gun.trashNode = (node) => new Promise(res => {
     gun.user().get("trash").set(node)
     node.put(null)
@@ -61,31 +71,25 @@ gun.getUser = (alias) => {
         let key = ( Object.keys(userKeyData) )[0]
         if (!key) return resolve([ undefined, undefined ]);
         let userData = gun.get(key);
-        userData.once(data => {
-            resolve([ data, key ])
-        })
+        resolve(userData)
     })
 }
 
 //Better Listener handling since the off() function removes all listeners instead of just one
 gun.listenerMap = new Map();
-gun.valueMap = new Map();
 gun.addListener = (path, listener) => {
     //Get Current Listeners for path
     let listenerList = gun.listenerMap.get(path) || []
     let isNewPath = !listenerList.length;
     //Add New Listener
     gun.listenerMap.set(path, [...listenerList, listener])
+    let node = gun.getNodeByPath(path);
+    node.once((value) => {listener(value)})
+
     if(isNewPath){
-        gun.getNodeByPath(path).on((value, key, _msg, _ev) => {
-            gun.valueMap.set(path, [value, key, _msg, _ev])
+        node.on((value, key, _msg, _ev) => {
             gun.listenerMap.get(path).forEach(l => l(value, key, _msg, _ev))
         })
-    } else {
-        let currentVal = gun.valueMap.get(path)
-        if(currentVal){
-            listener(...currentVal)
-        }
     }
 }
 gun.removeListener = (path, listener) => {
