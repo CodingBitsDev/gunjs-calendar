@@ -48,7 +48,7 @@ gun.getValAsync = (keyPath, startNode) => new Promise(res => {
     let keys = ( keyPath || "" ).split(".");
 
     let node 
-    if (!keyPath && !startNode) return res(undefined);
+    if (!keyPath && !startNode) res(undefined);
     if(startNode) {
         node = startNode;
         for (let i = 0; i < keys.length; i++) {
@@ -57,8 +57,10 @@ gun.getValAsync = (keyPath, startNode) => new Promise(res => {
     } else {
         node = gun.getNodeByPath(keyPath)
     }
-    node.once((data) => {
-        return res(data)
+    console.log("###n", node)
+    node.on(( data, key, _msg, _ev ) => {
+        _ev.off()
+        res(data)
     })
     setTimeout(() => {res({err:`Could not fetch ${keyPath}(0) from ${startNode}(1)`, errData:[keyPath, startNode]})},5000)
 })
@@ -77,7 +79,7 @@ gun.getUser = (alias) => {
 
 //Better Listener handling since the off() function removes all listeners instead of just one
 gun.listenerMap = new Map();
-gun.addListener = (path, listener) => {
+gun.addListener = (path, listener, changeOnly) => {
     //Get Current Listeners for path
     let listenerList = gun.listenerMap.get(path) || []
     let isNewPath = !listenerList.length;
@@ -89,7 +91,7 @@ gun.addListener = (path, listener) => {
     if(isNewPath){
         node.on((value, key, _msg, _ev) => {
             gun.listenerMap.get(path).forEach(l => l(value, key, _msg, _ev))
-        })
+        }, changeOnly ? {change: changeOnly} : undefined)
     }
 }
 gun.removeListener = (path, listener) => {

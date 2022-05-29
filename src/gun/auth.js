@@ -10,7 +10,10 @@ export function restoreSession(){
     if (window.sessionStorage.recall) {
       //we have a session to restore so lets restore it
       gun.user().recall({ sessionStorage: true }, function(res) {
-        if (!res.err) { resolve(true) }
+        if (!res.err) { 
+          notifySignInListener(true);
+          resolve(true)
+        }
         else resolve({err: res.err})
       })
     } else {
