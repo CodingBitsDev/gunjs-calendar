@@ -1,5 +1,5 @@
 import React, {useEffect, useCallback, useState} from "react";
-import gun from "..";
+import gunHelper, {gun} from "../gunHelper";
 
 import { restoreSession ,canRecall, signIn as gunSignIn, signUp as gunSignup, recall as gunRecall, onSignedIn } from "../auth";
 

@@ -1,4 +1,4 @@
-import gun from "./index"
+import gunHelper, { gun } from "./gunHelper"
 import SEA from "gun/sea"
 
 const signInListener = new Set()
@@ -56,7 +56,7 @@ export async function signUp(name, pw, userName, pin){
 }
 
 export async function setUserName(userName){
-  await gun.userAppRoot().get("name").put(userName);
+  await gunHelper.userAppRoot().get("name").put(userName);
 }
 
 export function signIn(name, pw, persist){
@@ -82,13 +82,13 @@ export function onSignedIn(cb){
 
 function persistUser(name, pw, pin){
   return new Promise(async (resolve) => {
-    let savedPin = await gun.getValAsync("auth_pin", gun.userAppRoot())
-    if(savedPin) savedPin = await gun.decryptUser(savedPin);
+    let savedPin = await gunHelper.onceAsync("auth_pin", gunHelper.userAppRoot())
+    if(savedPin) savedPin = await gunHelper.decryptUser(savedPin);
 
     let pinNumber = !isNaN(parseFloat(pin)) ? parseFloat(pin) : savedPin;
     if(!pinNumber) return resolve(true);
     if(!savedPin){
-      await gun.userAppRoot().get("auth_pin").put(await gun.encryptUser(pinNumber));
+      await gunHelper.userAppRoot().get("auth_pin").put(await gunHelper.encryptUser(pinNumber));
     }
     let authData = await SEA.encrypt({name,pw: pw}, pinNumber)
     localStorage.setItem("gun_auth", authData);

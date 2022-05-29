@@ -1,4 +1,3 @@
-import GUN, {user} from "./gun/index"
 import {login, signUp, canRecall, recall} from "./gun/auth"
 
 import logo from './logo.svg';
