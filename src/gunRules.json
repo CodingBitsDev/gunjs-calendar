@@ -1,9 +1,11 @@
 {
-  "user":{
+  "_user":{
     "calendars":{
-      "key": { "type": "encUser" },
-      "months": { 
-        "*": { "type": "enc", "keyPair": "_back._back.key"}
+      "$calendarId":{
+        "key": { "type": "encUser" },
+        "months": { 
+          "$monthId": { "type": "enc", "keyPair": "_back._back.key"}
+        }
       }
     }
   }

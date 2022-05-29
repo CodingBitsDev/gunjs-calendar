@@ -125,15 +125,15 @@ const gunHelper = (function() {
       }, maxRequestTime)
     }),
 
-    getUserInfo: (alias) => {
+    getUserNode: (alias) => {
         return new Promise(async resolve => {
             if (!alias) return resolve([ undefined, undefined ]);
             let userKeyData = {...(await gunHelper.onceAsync(`~@${alias}`) || {})}
             delete userKeyData["_"];
             let key = ( Object.keys(userKeyData) )[0]
             if (!key) return resolve([ undefined, undefined ]);
-            let userData = gun.get(key);
-            resolve(userData)
+            let node = gun.get(key);
+            resolve(node)
         })
     }
   };
