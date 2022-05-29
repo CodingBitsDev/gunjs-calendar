@@ -70,8 +70,8 @@ const gunHelper = (function() {
 
     getNodeByPath: (path) => {
       let pathSplit = path.split("/")
-      let isUserRoot = pathSplit[0] == "user";
-      let isPublicRoot = pathSplit[0] == "public";
+      let isUserRoot = pathSplit[0] == "_user";
+      let isPublicRoot = pathSplit[0] == "_public";
       let node = isUserRoot ?  gunHelper.userAppRoot() : isPublicRoot ? gunHelper.publicAppRoot() : gun;
       for (let index = isUserRoot ? 1 : 0; index < pathSplit.length; index++) {
         node = node.get(pathSplit[index]) 

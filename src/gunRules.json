@@ -1,0 +1,10 @@
+{
+  "user":{
+    "calendars":{
+      "key": { "type": "encUser" },
+      "months": { 
+        "*": { "type": "enc", "keyPair": "_back._back.key"}
+      }
+    }
+  }
+}
