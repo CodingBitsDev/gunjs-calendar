@@ -24,7 +24,7 @@ export const createCalendar = createAsyncThunk("gunData/createCalendar", async (
       gun.userAppRoot()
         .get("calendars")
         .get(calendarKey)
-        .get("owner").put(await gun.getValAsync("user.name"))
+        .get("owner").put(await gun.getValAsync("user/name"))
         .back()
         .get("months").get(currentMonthKey).put(await SEA.encrypt([],keyPair))
         .back().back()
@@ -41,7 +41,7 @@ export const createCalendar = createAsyncThunk("gunData/createCalendar", async (
 let trackedCalendars = []
 export const initGunData = createAsyncThunk("gunData/initGunData", async (data, thunkAPI) => {
   return new Promise((res, rej) => {
-    gun.addListener("user.calendars", (calendars, gunKey, _msg, _ev) => {
+    gun.addListener("user/calendars", (calendars, gunKey, _msg, _ev) => {
     //Download Calendars
       let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val)
       calendarList.forEach(async ([key, data]) => {
@@ -49,8 +49,8 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
         if( !trackedCalendars.includes(key)){
           trackedCalendars.push(key)
           const calendarListener = (calendar) => {
-            if(calendar == null) gun.removeListener(`user.calendars.${key}`, calendarListener)
-            let node = gun.getNodeByPath(`user.calendars.${key}`)
+            if(calendar == null) gun.removeListener(`user/calendars/${key}`, calendarListener)
+            let node = gun.getNodeByPath(`user/calendars/${key}`)
             node.load(async (data) => {
               let calendar = {...data}
               calendar.key = await gun.decryptUser(data.key);
@@ -71,7 +71,7 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
               thunkAPI.dispatch(calendarLoaded({ key, data:calendar }))
             }) 
           }
-          gun.addListener(`user.calendars.${key}`, calendarListener)
+          gun.addListener(`user/calendars.${key}`, calendarListener)
         }
       });
       res();
@@ -93,7 +93,7 @@ export const addDate = createAsyncThunk("gunData/addDate", (data, thunkAPI) => {
 
     let newMonth = [...( calendar.months[calendarMonthKey] || [] ), {...date, id: uuid()}]
     let encryptedMonth = await SEA.encrypt(newMonth, calendar.key)
-    gun.getNodeByPath(`user.calendars.${calendarId}.months.${calendarMonthKey}`).put(encryptedMonth)
+    gun.getNodeByPath(`user/calendars/${calendarId}/months/${calendarMonthKey}`).put(encryptedMonth)
     res()
   })
 });
@@ -105,7 +105,7 @@ export const removeDate = createAsyncThunk("gunData/removeDate", ({calendarId, m
 
     let newMonth = calendar.months[monthId].filter(date => date.id != dateId);
     let encryptedMonth = await SEA.encrypt(newMonth, calendar.key)
-    gun.getNodeByPath(`user.calendars.${calendarId}.months.${monthId}`).put(encryptedMonth)
+    gun.getNodeByPath(`user/calendars/${calendarId}/months/${monthId}`).put(encryptedMonth)
     res()
   })
 });
@@ -118,7 +118,7 @@ export const editDate = createAsyncThunk("gunData/editDate", ({calendarId, month
 
     let newMonth = [...calendar.months[monthId].filter(date => date.id != dateId), date];
     let encryptedMonth = await SEA.encrypt(newMonth, calendar.key)
-    gun.getNodeByPath(`user.calendars.${calendarId}.months.${monthId}`).put(encryptedMonth)
+    gun.getNodeByPath(`user/calendars/${calendarId}/months/${monthId}`).put(encryptedMonth)
     res()
   })
 });

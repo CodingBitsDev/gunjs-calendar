@@ -34,7 +34,7 @@ gun.publicAppRoot = () => {
     return gun.get(APP_KEY)
 }
 gun.getNodeByPath = (path) => {
-    let pathSplit = path.split(".")
+    let pathSplit = path.split("/")
     let isUserRoot = pathSplit[0] == "user";
     let isPublicRoot = pathSplit[0] == "public";
     let node = isUserRoot ?  gun.userAppRoot() : isPublicRoot ? gun.publicAppRoot() : gun;
@@ -57,7 +57,6 @@ gun.getValAsync = (keyPath, startNode) => new Promise(res => {
     } else {
         node = gun.getNodeByPath(keyPath)
     }
-    console.log("###n", node)
     node.on(( data, key, _msg, _ev ) => {
         _ev.off()
         res(data)
