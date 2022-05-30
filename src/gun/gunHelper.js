@@ -21,6 +21,34 @@ const gunHelper = (function() {
   const listenerMap = new Map();
   const changeOnlyListenerMap = new Map();
 
+  let rules = {};
+
+  let getRulesForPath = (path) => {
+    let rulesPart = rules;
+    let pathSplit = path.split("/")
+    let wildCards = new Map();
+    for (let i = 0; i < pathSplit.length; i++) {
+      if(!rulesPart) break;
+      let rule = rulesPart[pathSplit[i]];
+      if(rule){ 
+        rulesPart = rule;
+        continue
+      }
+      let restRules = Object.entries(rulesPart).filter(([key, val]) => key.startsWith("$"))
+      if(restRules.length > 1) throw new Error(`[GUN-HELPER] The rule "${pathSplit[i-1] || "ROOT"}" has more than one wildcard.`)
+      if(!restRules.length){ 
+        rulesPart = null; 
+        continue;
+      }
+      wildCards.set(restRules[0][0].replace("$", ""),pathSplit[i])
+      rulesPart = restRules[0][1];
+    }
+
+    //TODO Replace values in strings with wildcards
+    console.log(rulesPart, wildCards)
+  }
+  window.getRulesForPath = getRulesForPath;
+
   return { // public interface
     gun,
     get listenerMap(){ return {changeOnlyListenerMap, listenerMap} },
@@ -31,7 +59,9 @@ const gunHelper = (function() {
       if(!APP_KEY) APP_KEY = key
       else throw new Error("[GUN_HELPER] appKey can only be set once")
     },
-
+    setRules: (newRules) => {
+      rules = newRules
+    },
     on: function (path, listener, changeOnly) {
       let map = !changeOnly ? listenerMap : changeOnlyListenerMap;
       //Get Current Listeners for path
