@@ -125,17 +125,19 @@ const gunHelper = (function() {
       }, maxRequestTime)
     }),
 
-    getUserNode: (alias) => {
-        return new Promise(async resolve => {
-            if (!alias) return resolve([ undefined, undefined ]);
-            let userKeyData = {...(await gunHelper.onceAsync(`~@${alias}`) || {})}
-            delete userKeyData["_"];
-            let key = ( Object.keys(userKeyData) )[0]
-            if (!key) return resolve([ undefined, undefined ]);
-            let node = gun.get(key);
-            resolve(node)
-        })
+    getUserKey: async (alias) => {
+      if (!alias) return {err: "no alias set"};
+      let userKeyData = {...(await gunHelper.onceAsync(`~@${alias}`) || {})}
+      delete userKeyData["_"];
+      let key = ( Object.keys(userKeyData) )[0]
+      if (!key) return {err: "user does not exist"};
+      return key;
+    },
+    load: async (path, cb) => {
+      let node = gunHelper.getNodeByPath(path);
     }
+
+    
   };
 })();
 
