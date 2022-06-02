@@ -9,6 +9,7 @@ import "gun/lib/radisk"
 import "gun/lib/store"
 import "gun/lib/rindexed"
 
+import {getRulesForPath, decryptByRule} from "./gunRulesHelper.js"
 require('gun/lib/unset.js')
 // let knownGunServer = ["http://localhost:1337/gun", "https://gun-manhattan.herokuapp.com/gun"]
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
@@ -23,31 +24,7 @@ const gunHelper = (function() {
 
   let rules = {};
 
-  let getRulesForPath = (path) => {
-    let rulesPart = rules;
-    let pathSplit = path.split("/")
-    let wildCards = new Map();
-    for (let i = 0; i < pathSplit.length; i++) {
-      if(!rulesPart) break;
-      let rule = rulesPart[pathSplit[i]];
-      if(rule){ 
-        rulesPart = rule;
-        continue
-      }
-      let restRules = Object.entries(rulesPart).filter(([key, val]) => key.startsWith("$"))
-      if(restRules.length > 1) throw new Error(`[GUN-HELPER] The rule "${pathSplit[i-1] || "ROOT"}" has more than one wildcard.`)
-      if(!restRules.length){ 
-        rulesPart = null; 
-        continue;
-      }
-      wildCards.set(restRules[0][0].replace("$", ""),pathSplit[i])
-      rulesPart = restRules[0][1];
-    }
-
-    //TODO Replace values in strings with wildcards
-    console.log(rulesPart, wildCards)
-  }
-  window.getRulesForPath = getRulesForPath;
+  window.getRulesForPath = (path) => getRulesForPath(rules, path)
 
   return { // public interface
     gun,
@@ -102,9 +79,12 @@ const gunHelper = (function() {
       let pathSplit = path.split("/")
       let isUserRoot = pathSplit[0] == "_user";
       let isPublicRoot = pathSplit[0] == "_public";
+      let hasRoot = ["_user","_public"].includes(pathSplit[0])
+
       let node = isUserRoot ?  gunHelper.userAppRoot() : isPublicRoot ? gunHelper.publicAppRoot() : gun;
-      for (let index = isUserRoot ? 1 : 0; index < pathSplit.length; index++) {
-        node = node.get(pathSplit[index]) 
+      for (let index = hasRoot ? 1 : 0; index < pathSplit.length; index++) {
+        if(pathSplit[index] == "_back") node = node.back();
+        else node = node.get(pathSplit[index]) 
       }
       return node;
     },
@@ -131,27 +111,20 @@ const gunHelper = (function() {
       gun.user().get("trash").set(node)
       node.put(null)
     }),
-    onceAsync: (keyPath, startNode, maxRequestTime = 5000) => new Promise(res => {
+    onceAsync: (keyPath, maxRequestTime = 5000) => new Promise(res => {
       let cancleInterval = null;
       let keys = ( keyPath || "" ).split(".");
 
-      let node 
-      if (!keyPath && !startNode) res(undefined);
-      if(startNode) {
-        node = startNode;
-        for (let i = 0; i < keys.length; i++) {
-            node = node.get(keys[i])
-        }
-      } else {
-        node = gunHelper.getNodeByPath(keyPath)
-      }
+      let node = gunHelper.getNodeByPath(keyPath)
       node.once(( data, key, _msg, _ev ) => {
         if(cancleInterval) clearInterval(cancleInterval);
-        res(data)
+        let rule = getRulesForPath(rules, keyPath);
+        let result = decryptByRule(rule, data)
+        res(result)
       })
       cancleInterval = setInterval(() => {
         clearImmediate(cancleInterval)
-        res({err:`Could not fetch ${keyPath}(0) from ${startNode}(1)`, errData:[keyPath, startNode]})
+        res({err:`Could not fetch ${keyPath}(0)`, errData:[keyPath]})
       }, maxRequestTime)
     }),
 

@@ -82,7 +82,7 @@ export function onSignedIn(cb){
 
 function persistUser(name, pw, pin){
   return new Promise(async (resolve) => {
-    let savedPin = await gunHelper.onceAsync("auth_pin", gunHelper.userAppRoot())
+    let savedPin = await gunHelper.onceAsync("_user/auth_pin")
     if(savedPin) savedPin = await gunHelper.decryptUser(savedPin);
 
     let pinNumber = !isNaN(parseFloat(pin)) ? parseFloat(pin) : savedPin;

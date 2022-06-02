@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import gunRules from './gunRules';
 
 import gunHelper from './gun/gunHelper';
 gunHelper.appKey = "gun-calendar"
+gunHelper.setRules(gunRules);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
