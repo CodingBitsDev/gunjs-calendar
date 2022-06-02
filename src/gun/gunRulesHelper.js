@@ -9,7 +9,7 @@ export function getRulesForPath (rules, path){
     if(!rulesPart) break;
     let rule = rulesPart[pathSplit[i]];
     if(rule){ 
-      rulesPart = rule;
+      rulesPart = { ...rule };
       continue
     }
     let restRules = Object.entries(rulesPart).filter(([key, val]) => key.startsWith("$"))
@@ -30,6 +30,8 @@ export function getRulesForPath (rules, path){
         if(returnString.includes(`{${id}}`)) returnString = returnString.replaceAll(`{${ id }}`, sub);
       })
       returnRules[key] = returnString;
+    } else {
+      returnRules[key] = val;
     }
     return undefined
   })
@@ -38,12 +40,35 @@ export function getRulesForPath (rules, path){
   return returnRules; 
 }
 
-export async function decryptByRule(rule, data){
+export async function decryptByRule(rule, data, parentPath, parentData, rules){
   if(rule.type == "encUser"){
     return await gunHelper.decryptUser(data)
   } else if ( rule.type == "enc"){
+    let key = null;
     let keyPath = rule.keyPair || rule.key;
-    let key = await gunHelper.onceAsync(keyPath)
+    if(parentPath && parentData && keyPath.startsWith(parentPath)){
+      let path = parentPath.replace(parentPath);
+      if (path.startsWith("/")) path = path.substring(1);
+      let split = path.split("/").filter(Boolean);
+
+      let updateKeyData = () => {}
+      let keyData = parentData;
+      let keyDataFound = !split.some((key) => {
+        if(!keyData) {
+          updateKeyData = (val) => keyData[key] = val;
+          keyData = keyData?.[key]
+        }
+        else return false;
+      }) 
+      if(keyDataFound && keyData){
+        if(keyData?.startsWith("SEA")){
+          let rule = getRulesForPath(rules, path)
+          keyData = await decryptByRule(rule, keyData, parentPath, parentData, rules)
+          updateKeyData(keyData)
+        }
+      }
+      key = keyData || await gunHelper.onceAsync(keyPath);
+    } else key = await gunHelper.onceAsync(keyPath)
     return await SEA.decrypt(data, key)
   }
   return data;
