@@ -24,8 +24,6 @@ const gunHelper = (function() {
 
   let rules = {};
 
-  window.getRulesForPath = (path) => getRulesForPath(rules, path)
-
   return { // public interface
     gun,
     get listenerMap(){ return {changeOnlyListenerMap, listenerMap} },
@@ -36,8 +34,11 @@ const gunHelper = (function() {
       if(!APP_KEY) APP_KEY = key
       else throw new Error("[GUN_HELPER] appKey can only be set once")
     },
-    setRules: (newRules) => {
+    set rules(newRules){
       rules = newRules
+    },
+    get rules(){
+      return rules;
     },
     on: function (path, listener, changeOnly) {
       let map = !changeOnly ? listenerMap : changeOnlyListenerMap;
@@ -47,12 +48,17 @@ const gunHelper = (function() {
       //Add New Listener
       map.set(path, [...listeners, listener])
 
-      let node = gunHelper.getNodeByPath(path);
-      node.once((value) => {listener(value)})
+      gunHelper.onceAsync(path).then(val => {
+        listener(val)
+      })
 
+      
       if(isNewPath){
-        node.on((value, key, _msg, _ev) => {
-          listenerMap.get(path).forEach(l => l(value, key, _msg, _ev))
+        let rule = getRulesForPath(path)
+        gunHelper.getNodeByPath(path).on((value, key, _msg, _ev) => {
+          decryptByRule(rule, value).then((val) => {
+            listenerMap.get(path).forEach(l => l(val, key, _msg, _ev))
+          })
         }, changeOnly ? {change: changeOnly} : undefined)
       }
     },
@@ -76,7 +82,7 @@ const gunHelper = (function() {
     },
 
     getNodeByPath: (path) => {
-      let pathSplit = path.split("/")
+      let pathSplit = path.split("/").filter(s => !!s.length)
       let isUserRoot = pathSplit[0] == "_user";
       let isPublicRoot = pathSplit[0] == "_public";
       let hasRoot = ["_user","_public"].includes(pathSplit[0])
@@ -113,17 +119,15 @@ const gunHelper = (function() {
     }),
     onceAsync: (keyPath, maxRequestTime = 5000) => new Promise(res => {
       let cancleInterval = null;
-      let keys = ( keyPath || "" ).split(".");
 
       let node = gunHelper.getNodeByPath(keyPath)
       node.once(( data, key, _msg, _ev ) => {
         if(cancleInterval) clearInterval(cancleInterval);
-        let rule = getRulesForPath(rules, keyPath);
-        let result = decryptByRule(rule, data)
-        res(result)
+        let rule = getRulesForPath(keyPath);
+        decryptByRule(rule, data).then(res)
       })
       cancleInterval = setInterval(() => {
-        clearImmediate(cancleInterval)
+        clearInterval(cancleInterval)
         res({err:`Could not fetch ${keyPath}(0)`, errData:[keyPath]})
       }, maxRequestTime)
     }),
@@ -136,8 +140,19 @@ const gunHelper = (function() {
       if (!key) return {err: "user does not exist"};
       return key;
     },
-    load: async (path, cb) => {
-      let node = gunHelper.getNodeByPath(path);
+    load: (path, cb, opt) => {
+      let cleanPath = path[path.length-1] == "/" ? path.substr(0,path.length-1) : path
+
+      return new Promise(( res, rej ) => {
+        let node = gunHelper.getNodeByPath(cleanPath);
+        node.load(data => {
+          let rule = getRulesForPath(cleanPath);
+          decryptByRule(rule, data, cleanPath, data).then(result => {
+            cb && cb(result)
+            res(result)
+          })
+        })
+      })
     }
 
     

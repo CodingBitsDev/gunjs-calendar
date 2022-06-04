@@ -5,7 +5,7 @@ module.exports = {
       "$calendarId":{
         "key": { "type": "encUser" },
         "months": { 
-          "$monthId": { "type": "enc", "keyPair": "_user.calendars.{calendarId}.key"}
+          "$monthId": { "type": "enc", "keyPair": "_user/calendars/{calendarId}/key"}
         }
       }
     }

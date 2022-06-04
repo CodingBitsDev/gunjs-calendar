@@ -1,7 +1,8 @@
 import { SEA } from "gun";
 import gunHelper from "./gunHelper";
 
-export function getRulesForPath (rules, path){
+export function getRulesForPath (path){
+  let rules = gunHelper.rules;
   let rulesPart = rules;
   let pathSplit = path.split("/").filter(Boolean)
   let wildCards = new Map();
@@ -40,7 +41,7 @@ export function getRulesForPath (rules, path){
   return returnRules; 
 }
 
-export async function decryptByRule(rule, data, parentPath, parentData, rules){
+export async function decryptByRule(rule, data, parentPath, parentData, subPath = ""){
   if(rule.type == "encUser"){
     return await gunHelper.decryptUser(data)
   } else if ( rule.type == "enc"){
@@ -62,14 +63,39 @@ export async function decryptByRule(rule, data, parentPath, parentData, rules){
       }) 
       if(keyDataFound && keyData){
         if(keyData?.startsWith("SEA")){
-          let rule = getRulesForPath(rules, path)
-          keyData = await decryptByRule(rule, keyData, parentPath, parentData, rules)
+          let rule = getRulesForPath(path)
+          keyData = await decryptByRule(rule, keyData, parentPath, parentData)
           updateKeyData(keyData)
         }
       }
       key = keyData || await gunHelper.onceAsync(keyPath);
-    } else key = await gunHelper.onceAsync(keyPath)
+    } else {
+      key = await gunHelper.onceAsync(keyPath)
+    }
     return await SEA.decrypt(data, key)
   }
+
+  let dataIsObject = typeof data === 'object' && data !== null
+
+  if(dataIsObject && parentData && parentPath){
+    let entries = !Array.isArray(data) ? Object.entries(data || {}) : data;
+    let dataCopy = {}
+    let dataPromises = []
+    for (let i = 0; i < entries.length; i++) {
+      let key = entries[i][0]
+      let value = entries[i][1]
+      let keyPath = `${subPath || parentPath}/${key}`
+      let isObj = typeof value === 'object' && value !== null && !Array.isArray(value)
+      console.log("### res", subPath, keyPath, key, isObj, isObj && entries[i])
+      // let subRule = getRulesForPath(keyPath)
+      // dataPromises.push(new Promise(async res => {
+      //   dataCopy[key] = await decryptByRule(subRule, value, parentPath, parentData, keyPath)
+      //   res();
+      // }))
+    }
+    await Promise.all(dataPromises);
+    return { ...dataCopy };
+  }
+
   return data;
 }

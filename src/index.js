@@ -7,7 +7,7 @@ import gunRules from './gunRules';
 
 import gunHelper from './gun/gunHelper';
 gunHelper.appKey = "gun-calendar"
-gunHelper.setRules(gunRules);
+gunHelper.rules = gunRules;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
