@@ -48,22 +48,28 @@ export async function decryptByRule(rule, data, parentPath, parentData, subPath 
     let key = null;
     let keyPath = rule.keyPair || rule.key;
     if(parentPath && parentData && keyPath.startsWith(parentPath)){
-      let path = parentPath.replace(parentPath);
+      //See if key exists in parent
+      let cleanParentPath = parentPath[parentPath.length-1] == "/" ? parentPath.substr(0,parentPath.length-1) : parentPath
+
+      let path = keyPath.replace(cleanParentPath + "/","");
       if (path.startsWith("/")) path = path.substring(1);
       let split = path.split("/").filter(Boolean);
 
       let updateKeyData = () => {}
       let keyData = parentData;
-      let keyDataFound = !split.some((key) => {
-        if(!keyData) {
-          updateKeyData = (val) => keyData[key] = val;
-          keyData = keyData?.[key]
+      let keyDataFound = split.some((k) => {
+        if(keyData[k]) {
+          let preData = keyData;
+          updateKeyData = (val) => preData[k] = val;
+          keyData = keyData?.[k]
+          return true
         }
         else return false;
       }) 
       if(keyDataFound && keyData){
-        if(keyData?.startsWith("SEA")){
-          let rule = getRulesForPath(path)
+        console.log(keyData)
+        if(keyData?.startsWith?.("SEA")){
+          let rule = getRulesForPath(cleanParentPath + "/" + path)
           keyData = await decryptByRule(rule, keyData, parentPath, parentData)
           updateKeyData(keyData)
         }
@@ -86,12 +92,11 @@ export async function decryptByRule(rule, data, parentPath, parentData, subPath 
       let value = entries[i][1]
       let keyPath = `${subPath || parentPath}/${key}`
       let isObj = typeof value === 'object' && value !== null && !Array.isArray(value)
-      console.log("### res", subPath, keyPath, key, isObj, isObj && entries[i])
-      // let subRule = getRulesForPath(keyPath)
-      // dataPromises.push(new Promise(async res => {
-      //   dataCopy[key] = await decryptByRule(subRule, value, parentPath, parentData, keyPath)
-      //   res();
-      // }))
+      let subRule = getRulesForPath(keyPath)
+        dataPromises.push(new Promise(async res => {
+        dataCopy[key] = await decryptByRule(subRule, isObj ? { ...value }:value, parentPath, parentData, keyPath)
+        res();
+      }))
     }
     await Promise.all(dataPromises);
     return { ...dataCopy };
