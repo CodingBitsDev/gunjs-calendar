@@ -67,7 +67,6 @@ export async function decryptByRule(rule, data, parentPath, parentData, subPath 
         else return false;
       }) 
       if(keyDataFound && keyData){
-        console.log(keyData)
         if(keyData?.startsWith?.("SEA")){
           let rule = getRulesForPath(cleanParentPath + "/" + path)
           keyData = await decryptByRule(rule, keyData, parentPath, parentData)
