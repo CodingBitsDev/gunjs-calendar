@@ -11,6 +11,7 @@ let getHours = (ref) => {
 }
 
 const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
+  let tooltipRef = useRef();
   let [ renderd, setRenderd ] = useState(false);
   useEffect(() => { 
     if(!renderd) setRenderd(true);
@@ -46,14 +47,16 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       let hourClicked = () => { onClickHour && onClickHour(hour) }
 
       hoursComponents.push(
-        <div 
-          className="absolute opacity-60 cursor-pointer"
-          style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.what || "") }}
-          data-tip={`What: ${hour.what}<br/>Start:${getHourString(startHour, startMinute)}<br/>End: ${getHourString(endHour, endMinute)}`}
-          onClick={hourClicked}
-        >
-          <ReactTooltip type={"dark"} multiline effect="float" border />
-        </div>
+        <>
+          <div 
+            className="absolute opacity-60 cursor-pointer"
+            style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.what || "") }}
+            data-tip={`What: ${hour.what}<br/>Start:${getHourString(startHour, startMinute)}<br/>End: ${getHourString(endHour, endMinute)}`}
+            onClick={hourClicked}
+          >
+          </div>
+          { <ReactTooltip ref={ tooltipRef } className={`z-50 absolute`} type={"dark"} multiline effect="float" border />}
+        </>
       )
     })
   }
@@ -62,6 +65,7 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
     <CalendarHour
       key={"header"}
       bigText={weekday}
+      subText={getDayString(date)}
       firstWeek={true}
       firstHour={true}
       lastWeek={last}
@@ -109,6 +113,20 @@ function getHourString(hour, minute){
   if(!minute) hourString += "00";
   else hourString += Number(minute) > 9 ? minute : "0" + minute
   return hourString;
+}
+
+function getDayString(date){
+  let day = date.getDate();
+  let month = date.getMonth();
+  let weekDays = date.getDay()
+
+  let dayString = "";
+  dayString += day > 9 ? day : "0" + day
+  dayString += ".";
+  dayString += month > 9 ? month : "0" + month
+  dayString += ".";
+  dayString += date.getFullYear()
+  return dayString;
 }
 
 function isToday(someDate){

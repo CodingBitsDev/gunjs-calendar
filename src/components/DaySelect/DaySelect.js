@@ -18,7 +18,6 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
 
   useEffect(() => {
-    console.log("### newDay", getDayString(day))
     let dayString = getDayString(day)
     setValue("day", dayString)
     setValue("time", getHourString(day.getHours(), day.getMinutes()))

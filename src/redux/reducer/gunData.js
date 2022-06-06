@@ -6,7 +6,8 @@ import { SEA } from 'gun';
 const initialState = {
   initiated: false,
   selectedCalendar: [],
-  calendars: {}
+  calendars: {},
+  activeCalendars: [],
 }
 
 export const createCalendar = createAsyncThunk("gunData/createCalendar", async (data, thunkAPI) => {
@@ -21,6 +22,7 @@ export const createCalendar = createAsyncThunk("gunData/createCalendar", async (
       let keyPair = await SEA.pair();
       await gunHelper.put(`_user/calendars/${calendarKey}/key`, keyPair);
       await Promise.all([
+        gunHelper.put(`_user/calendars/${calendarKey}/name`, "Main" ),
         gunHelper.put(`_user/calendars/${calendarKey}/owner`, gunHelper.onceAsync("_user/name") ),
         gunHelper.put(`_user/calendars/${calendarKey}/months/${currentMonthKey}`, []),
       ])
@@ -58,31 +60,35 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
           gunHelper.on(`_user/calendars/${key}`, calendarListener)
         }
       });
-      res();
+
+      //Set loaded calendars to active
+      res({activeCalendars: calendarList.map(([key]) => key), existentCalendar: calendarList.map(([key]) => key)});
     })
   })
 });
 
 export const addDate = createAsyncThunk("gunData/addDate", (data, thunkAPI) => {
   return new Promise(async (res, rej) => {
-    let calendarId = data.id;
+    let calendarId = data.calendarId;
     let date = data.date;
-    let calendar = thunkAPI.getState().gunData.calendars[calendarId];
-    if(!calendar || !date) return rej();
+    let calendar = thunkAPI.getState()?.gunData?.calendars?.[calendarId];
+    if(!calendar || !date) return rej("Calendar or date not correct");
 
     let calendarMonth= new Date(date.start);
     calendarMonth.setUTCDate(1);
     calendarMonth.setUTCHours(0,0,0,0);
     let calendarMonthKey = calendarMonth.getTime();
 
-    let newMonth = [...( calendar.months[calendarMonthKey] || [] ), {...date, id: uuid()}]
+    let newMonth = [...( calendar.months[calendarMonthKey] || [] ), {...data, id: uuid()}]
     await gunHelper.put(`_user/calendars/${calendarId}/months/${calendarMonthKey}`, newMonth)
     res()
   })
 });
 
-export const removeDate = createAsyncThunk("gunData/removeDate", ({calendarId, monthId, dateId }, thunkAPI) => {
+export const removeDate = createAsyncThunk("gunData/removeDate", ({monthId, date}, thunkAPI) => {
   return new Promise(async (res, rej) => {
+    let calendarId = date.calendarId;
+    let dateId = date?.id
     let calendar = thunkAPI.getState().gunData.calendars[calendarId];
     if(!calendar || !monthId || !dateId) return rej();
 
@@ -92,8 +98,9 @@ export const removeDate = createAsyncThunk("gunData/removeDate", ({calendarId, m
   })
 });
 
-export const editDate = createAsyncThunk("gunData/editDate", ({calendarId, monthId, date }, thunkAPI) => {
+export const editDate = createAsyncThunk("gunData/editDate", ({monthId, date }, thunkAPI) => {
   return new Promise(async (res, rej) => {
+    let calendarId = date.calendarId;
     let dateId = date?.id
     let calendar = thunkAPI.getState().gunData.calendars[calendarId];
     if(!date || !calendar || !monthId || !dateId) return rej();
@@ -114,14 +121,24 @@ export const counterSlice = createSlice({
   reducers: { 
     calendarLoaded: (state, { payload }) => {
       let calendarId = payload.key;
-      state.calendars[calendarId] = payload.data;
+      let removed = payload.removed
+      if(removed) delete state.calendars[calendarId];
+      else state.calendars[calendarId] = payload.data;
     }
 
   },
   extraReducers: {
     [initGunData.pending]: (state, actions) => {},
     [initGunData.fulfilled]: (state, {payload}) => {
-      console.log("### gunData initiated")
+      state.initiated = true;
+      let currentWeek = new Date();
+      let dayDiff = currentWeek.getDay() - 1
+      currentWeek.setDate(currentWeek.getDate() - dayDiff);
+      currentWeek.setHours(0,0,0,0);
+      state.currentWeek = currentWeek.getTime();
+
+      //All Callendars
+      state.activeCalendars = payload.activeCalendars;
     },
     [initGunData.rejected]: (state, {payload}) => {
 

@@ -1,6 +1,6 @@
 import React from "react";
 
-const CalendarHour = ({refFunc, isCurrentDay, firstWeek, firstHour, lastWeek, lastHour, bigText, smallText, onClickFree}) => {
+const CalendarHour = ({refFunc, isCurrentDay, firstWeek, firstHour, lastWeek, lastHour, bigText, subText, smallText, onClickFree}) => {
   let refProp = refFunc ? {ref: refFunc} : {}
   return ( 
     <div 
@@ -13,11 +13,12 @@ const CalendarHour = ({refFunc, isCurrentDay, firstWeek, firstHour, lastWeek, la
         ${firstHour ? "border-b-2" : ""}
         ${lastWeek ? "border-r-2" : ""}
         ${lastHour ? "border-b-2" : ""}
-        ${!!bigText ? `items-center justify-center sticky top-0 bg-black z-10` : "items-start justify-start relative"} 
+        ${!!bigText ? `flex-col items-center justify-center sticky top-0 bg-black z-10` : "items-start justify-start relative"} 
         ${onClickFree ? "cursor-pointer hover:bg-gray-800" : ""}
         `
       }>
         {!!bigText && <h1 className="text-white text-xl font-bold">{bigText}</h1>}
+        {!!bigText && <h2 className="text-white text-sm font-bold">{subText}</h2>}
         {!bigText && smallText && <h1 className="text-white text-sm absolute left-1 top-1">{smallText}</h1>}
     </div>
   );

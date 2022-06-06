@@ -4,13 +4,31 @@ import { useForm } from "react-hook-form";
 import useGunValue from "../../gun/hooks/useGunValue";
 import DaySelect from "../DaySelect/DaySelect";
 
-function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit}){
+function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit, calendars, dateId, calendarId}){
   let [start, setStart] = useState(new Date(startDate))
   let [end, setEnd] = useState(new Date(endDate || Date.now()))
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
+  let [selectedCalendar, setSelectedCalendar] = useState(null)
+
+  let calendarList = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
+    return [calendarId, calendar?.name || "Unknwon"]
+  })
+
+  useEffect(() => {
+    let calendarList = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
+      return [calendarId, calendar?.name || "Unknwon"]
+    })
+    if(!calendarList.length) return
+    if(!selectedCalendar) setSelectedCalendar(calendarList[0][0])
+  },[calendars])
+
+
 
   const onSubmit = (data) => {
-    onSave?.(start, end, data.name)
+    let startDate = new Date(start)
+    let endDate = new Date(end)
+
+    onSave?.(startDate.getTime(), endDate.getTime(), data.name, selectedCalendar)
   }
 
   const cancle = () => {
@@ -18,7 +36,7 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
   }
 
   const deletePressed  = () => {
-    onDelete?.();
+    onDelete?.(calendarId, dateId);
   }
 
   return (
