@@ -17,7 +17,6 @@ require('gun/lib/unset.js')
 export const gun = GUN(["https://gun.nilsr.me/gun"]);
 
 const gunHelper = (function() {
-
   let APP_KEY = ""
   const listenerMap = new Map();
   const changeOnlyListenerMap = new Map();
@@ -140,23 +139,37 @@ const gunHelper = (function() {
       if (!key) return {err: "user does not exist"};
       return key;
     },
-    load: (path, cb, opt) => {
+    load: async (path, cb, opt) => {
       let cleanPath = path[path.length-1] == "/" ? path.substr(0,path.length-1) : path
 
-      let node = gunHelper.getNodeByPath(cleanPath);
-      return new Promise(( res, rej ) => {
-        node.load(data => {
-            let rule = getRulesForPath(cleanPath);
+      let load = async (path, decrypt = true) => {
+        let node = gunHelper.getNodeByPath(path);
+        return await new Promise((res, rej) => {
+          node.load(async data => {
+            let isObj = !!data && typeof data === 'object' &&  !Array.isArray(data)
+            if(isObj){
+              let entries = Object.entries(data);
+              for (let i = 0; i < entries.length; i++) {
+                const [key, val] = entries[i];
+                if (!!val && typeof val === 'object' &&  !Array.isArray(val)){
+                  data[key] = await load(`${path}/${key}`, false);
+                }
+              }
+            }
+            if(data && decrypt) {
+              let rule = getRulesForPath(cleanPath);
 
-            decryptByRule(rule, { ...data }, cleanPath, { ...data }).then(result => {
-              cb && cb(result)
-              res(result)
-            })
+              decryptByRule(rule, { ...data }, cleanPath, { ...data }).then(result => {
+                cb && cb(result)
+                res(result)
+              })
+            }
+            else res(data)
           })
-      })
+        })
+      }
+      return load(path) 
     }
-
-    
   };
 })();
 
