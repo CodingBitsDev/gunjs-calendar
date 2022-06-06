@@ -41,7 +41,7 @@ export function getRulesForPath (path){
   return returnRules; 
 }
 
-export async function decryptByRule(rule, data, parentPath, parentData, subPath = ""){
+export async function decryptByRule(rule, data, parentPath, parentData){
   if(rule.type == "encUser"){
     return await gunHelper.decryptUser(data)
   } else if ( rule.type == "enc"){
@@ -57,14 +57,14 @@ export async function decryptByRule(rule, data, parentPath, parentData, subPath 
 
       let updateKeyData = () => {}
       let keyData = parentData;
-      let keyDataFound = split.some((k) => {
+      let keyDataFound = !split.some((k) => {
         if(keyData[k]) {
           let preData = keyData;
           updateKeyData = (val) => preData[k] = val;
           keyData = keyData?.[k]
-          return true
+          return false
         }
-        else return false;
+        else return true;
       }) 
       if(keyDataFound && keyData){
         if(keyData?.startsWith?.("SEA")){
@@ -89,7 +89,7 @@ export async function decryptByRule(rule, data, parentPath, parentData, subPath 
     for (let i = 0; i < entries.length; i++) {
       let key = entries[i][0]
       let value = entries[i][1]
-      let keyPath = `${subPath || parentPath}/${key}`
+      let keyPath = `${rule.path}/${key}`
       let isObj = typeof value === 'object' && value !== null && !Array.isArray(value)
       let subRule = getRulesForPath(keyPath)
         dataPromises.push(new Promise(async res => {
@@ -98,8 +98,9 @@ export async function decryptByRule(rule, data, parentPath, parentData, subPath 
       }))
     }
     await Promise.all(dataPromises);
-    return { ...dataCopy };
-  }
+    let isObj
+    return !!data ? { ...dataCopy } : data;
+  } 
 
-  return data;
+  return dataIsObject ? { ...data } : data;
 }

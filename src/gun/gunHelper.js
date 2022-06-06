@@ -143,15 +143,16 @@ const gunHelper = (function() {
     load: (path, cb, opt) => {
       let cleanPath = path[path.length-1] == "/" ? path.substr(0,path.length-1) : path
 
+      let node = gunHelper.getNodeByPath(cleanPath);
       return new Promise(( res, rej ) => {
-        let node = gunHelper.getNodeByPath(cleanPath);
         node.load(data => {
-          let rule = getRulesForPath(cleanPath);
-          decryptByRule(rule, data, cleanPath, data).then(result => {
-            cb && cb(result)
-            res(result)
+            let rule = getRulesForPath(cleanPath);
+
+            decryptByRule(rule, { ...data }, cleanPath, { ...data }).then(result => {
+              cb && cb(result)
+              res(result)
+            })
           })
-        })
       })
     }
 
