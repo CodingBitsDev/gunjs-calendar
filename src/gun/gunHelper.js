@@ -146,16 +146,20 @@ const gunHelper = (function() {
         let node = gunHelper.getNodeByPath(path);
         return await new Promise((res, rej) => {
           node.load(async data => {
+
+            //Load sometimes doesn't correcntly load children the part below ensures that everything is loaded correctly
             let isObj = !!data && typeof data === 'object' &&  !Array.isArray(data)
             if(isObj){
               let entries = Object.entries(data);
               for (let i = 0; i < entries.length; i++) {
                 const [key, val] = entries[i];
-                if (!!val && typeof val === 'object' &&  !Array.isArray(val)){
+                if (!!val && typeof val === 'object' &&  !Array.isArray(val) && !Object.keys(val).length){
                   data[key] = await load(`${path}/${key}`, false);
                 }
               }
             }
+
+            //Decrypt data when all subparts are loaded
             if(data && decrypt) {
               let rule = getRulesForPath(cleanPath);
 
