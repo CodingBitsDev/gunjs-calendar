@@ -14,7 +14,7 @@ require('gun/lib/unset.js')
 // let knownGunServer = ["http://localhost:1337/gun", "https://gun-manhattan.herokuapp.com/gun"]
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
 
-export const gun = GUN(["https://gun.nilsr.me/gun"]);
+export const gun = GUN(["https://gun.nilsr.me/gun", "https://gun-manhattan.herokuapp.com/gun"]);
 
 const gunHelper = (function() {
   let APP_KEY = ""
@@ -39,49 +39,9 @@ const gunHelper = (function() {
     get rules(){
       return rules;
     },
-    on: function (path, listener, changeOnly) {
-      let map = !changeOnly ? listenerMap : changeOnlyListenerMap;
-      //Get Current Listeners for path
-      let listeners = map.get(path) || []
-      let isNewPath = !listeners.length;
-      //Add New Listener
-      map.set(path, [...listeners, listener])
-
-      gunHelper.onceAsync(path).then(val => {
-        listener(val)
-      })
-
-      
-      if(isNewPath){
-        let rule = getRulesForPath(path)
-        gunHelper.getNodeByPath(path).on((value, key, _msg, _ev) => {
-          decryptByRule(rule, value).then((val) => {
-            listenerMap.get(path).forEach(l => l(val, key, _msg, _ev))
-          })
-        }, changeOnly ? {change: changeOnly} : undefined)
-      }
-    },
-    off: function (path, listener) {
-      //Get Current Listeners for path
-      let listeners = listenerMap.get(path) || []
-      let changeOnlyListeners = changeOnlyListenerMap.get(path) || []
-      if(!listeners.length && !changeOnlyListeners.length) return;
-
-      let newList = listeners.filter((l) => l != listener)
-      let newListChange = changeOnlyListeners.filter((l) => l != listener)
-
-      listenerMap.set(path, newList)
-      changeOnlyListenerMap.set(path, newListChange)
-
-      let isLastListener = !newList.length;
-      let isLastListenerChange = !newListChange.length;
-
-      //TODO Probably better to add _ev to the map and remove the listeners individually if possible
-      if(isLastListener && isLastListenerChange) gunHelper.getNodeByPath(path).off(); 
-    },
-
+    cleanPath: (path) => path[path.length-1] == "/" ? path.substr(0,path.length-1) : path,
     getNodeByPath: (path) => {
-      let pathSplit = path.split("/").filter(s => !!s.length)
+      let pathSplit = gunHelper.cleanPath(path).split("/").filter(s => !!s.length)
       let isUserRoot = pathSplit[0] == "_user";
       let isPublicRoot = pathSplit[0] == "_public";
       let hasRoot = ["_user","_public"].includes(pathSplit[0])
@@ -93,13 +53,70 @@ const gunHelper = (function() {
       }
       return node;
     },
-    userAppRoot: () => {
-      if (!APP_KEY) throw new Error("[GUN_HELPER] App key is not set yet. Run gunHelper.appKey = KEY first.")
-      return gun.user().get(APP_KEY)
+    on: function (path, listener, changeOnly) {
+      let cleanPath = gunHelper.cleanPath(path)
+      let map = !changeOnly ? listenerMap : changeOnlyListenerMap;
+      //Get Current Listeners for path
+      let listeners = map.get(cleanPath) || []
+      let isNewPath = !listeners.length;
+      //Add New Listener
+      map.set(cleanPath, [...listeners, listener])
+
+      gunHelper.onceAsync(cleanPath).then(val => {
+        listener(val)
+      })
+
+      
+      if(isNewPath){
+        let rule = getRulesForPath(cleanPath)
+        gunHelper.getNodeByPath(cleanPath).on((value, key, _msg, _ev) => {
+          decryptByRule(rule, value).then((val) => {
+            listenerMap.get(cleanPath).forEach(l => l(val, key, _msg, _ev))
+          })
+        }, changeOnly ? {change: changeOnly} : undefined)
+      }
+    },
+    onceAsync: (keyPath, maxRequestTime = 5000) => new Promise(res => {
+      let path  = gunHelper.cleanPath(keyPath);
+      let cancleInterval = null;
+
+      let node = gunHelper.getNodeByPath(path)
+      node.once(( data, key, _msg, _ev ) => {
+        if(cancleInterval) clearInterval(cancleInterval);
+        let rule = getRulesForPath(path);
+        decryptByRule(rule, data).then(res)
+      })
+      cancleInterval = setInterval(() => {
+        clearInterval(cancleInterval)
+        res({err:`Could not fetch ${path}(0)`, errData:[path]})
+      }, maxRequestTime)
+    }),
+    off: function (path, listener) {
+      let cleanPath = gunHelper.cleanPath(path)
+      //Get Current Listeners for path
+      let listeners = listenerMap.get(cleanPath) || []
+      let changeOnlyListeners = changeOnlyListenerMap.get(cleanPath) || []
+      if(!listeners.length && !changeOnlyListeners.length) return;
+
+      let newList = listeners.filter((l) => l != listener)
+      let newListChange = changeOnlyListeners.filter((l) => l != listener)
+
+      listenerMap.set(cleanPath, newList)
+      changeOnlyListenerMap.set(cleanPath, newListChange)
+
+      let isLastListener = !newList.length;
+      let isLastListenerChange = !newListChange.length;
+
+      //TODO Probably better to add _ev to the map and remove the listeners individually if possible
+      if(isLastListener && isLastListenerChange) gunHelper.getNodeByPath(cleanPath).off(); 
     },
     publicAppRoot: () => {
       if (!APP_KEY) throw new Error("[GUN_HELPER] App key is not set yet. Run gunHelper.appKey = KEY first.")
       return gun.get(APP_KEY)
+    },
+    userAppRoot: () => {
+      if (!APP_KEY) throw new Error("[GUN_HELPER] App key is not set yet. Run gunHelper.appKey = KEY first.")
+      return gun.user().get(APP_KEY)
     },
 
     encryptUser: async (data) => {
@@ -116,21 +133,6 @@ const gunHelper = (function() {
       gun.user().get("trash").set(node)
       node.put(null)
     }),
-    onceAsync: (keyPath, maxRequestTime = 5000) => new Promise(res => {
-      let cancleInterval = null;
-
-      let node = gunHelper.getNodeByPath(keyPath)
-      node.once(( data, key, _msg, _ev ) => {
-        if(cancleInterval) clearInterval(cancleInterval);
-        let rule = getRulesForPath(keyPath);
-        decryptByRule(rule, data).then(res)
-      })
-      cancleInterval = setInterval(() => {
-        clearInterval(cancleInterval)
-        res({err:`Could not fetch ${keyPath}(0)`, errData:[keyPath]})
-      }, maxRequestTime)
-    }),
-
     getUserKey: async (alias) => {
       if (!alias) return {err: "no alias set"};
       let userKeyData = {...(await gunHelper.onceAsync(`~@${alias}`) || {})}
@@ -140,8 +142,6 @@ const gunHelper = (function() {
       return key;
     },
     load: async (path, cb, opt) => {
-      let cleanPath = path[path.length-1] == "/" ? path.substr(0,path.length-1) : path
-
       let load = async (path, decrypt = true) => {
         let node = gunHelper.getNodeByPath(path);
         return await new Promise((res, rej) => {
@@ -161,9 +161,9 @@ const gunHelper = (function() {
 
             //Decrypt data when all subparts are loaded
             if(data && decrypt) {
-              let rule = getRulesForPath(cleanPath);
+              let rule = getRulesForPath(path);
 
-              decryptByRule(rule, { ...data }, cleanPath, { ...data }).then(result => {
+              decryptByRule(rule, { ...data }, path, { ...data }).then(result => {
                 cb && cb(result)
                 res(result)
               })
@@ -172,7 +172,8 @@ const gunHelper = (function() {
           })
         })
       }
-      return load(path) 
+
+      return load(gunHelper.cleanPath(path)) 
     }
   };
 })();

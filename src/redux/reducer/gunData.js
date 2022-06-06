@@ -41,42 +41,33 @@ export const createCalendar = createAsyncThunk("gunData/createCalendar", async (
 let trackedCalendars = []
 export const initGunData = createAsyncThunk("gunData/initGunData", async (data, thunkAPI) => {
   return new Promise((res, rej) => {
-    // gunHelper.on("_user/calendars", (calendars, gunKey, _msg, _ev) => {
-    //   console.log("###", calendars)
-    // //Download Calendars
-    //   let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val)
-    //   calendarList.forEach(async ([key, data]) => {
-    //     if(data == null) return;
-    //     if( !trackedCalendars.includes(key)){
-    //       trackedCalendars.push(key)
-    //       const calendarListener = (calendar) => {
-    //         if(calendar == null) gunHelper.off(`_user/calendars/${key}`, calendarListener)
-    //         let node = gunHelper.getNodeByPath(`_user/calendars/${key}`)
-    //         node.load(async (data) => {
-    //           let calendar = {...data}
-    //           calendar.key = await gunHelper.decryptUser(data.key);
-    //           await Promise.all(Object.entries(calendar).map(( [key, val] ) => {
-    //             return new Promise(async res => {
-    //               if(val?.startsWith?.("SEA")) calendar[key] = await SEA.decrypt(val, calendar.key)
-    //               res();
-    //             })
-    //           }))
-    //           await Promise.all(Object.entries(calendar.months || []).map(( [key, val] ) => {
-    //             return new Promise(async res => {
-    //               if(val?.startsWith?.("SEA")) calendar.months[key] = await SEA.decrypt(val, calendar.key)
-    //               res();
-    //             })
-    //           }))
-
-              
-    //           thunkAPI.dispatch(calendarLoaded({ key, data:calendar }))
-    //         }) 
-    //       }
-    //       gunHelper.on(`_user/calendars.${key}`, calendarListener)
-    //     }
-    //   });
-    //   res();
-    // })
+    gunHelper.on("_user/calendars", (calendars, gunKey, _msg, _ev) => {
+    //Download Calendars
+      let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val).filter(Boolean)
+      calendarList.forEach(async ([key, data]) => {
+        if( !trackedCalendars.includes(key)){
+          let lastLoaded = 0;
+          console.log(key)
+          trackedCalendars.push(key)
+          const calendarListener = (calendar) => {
+            if(calendar == null) {
+              gunHelper.off(`_user/calendars/${key}`, calendarListener)
+              return
+            }
+            let now = Date.now()
+            if(lastLoaded < now-100){
+              lastLoaded = now
+              gunHelper.load(`_user/calendars/${key}`, (data => {
+                console.log("###", data)
+                thunkAPI.dispatch(calendarLoaded({ key, data }))
+              }))
+            }
+          }
+          gunHelper.on(`_user/calendars/${key}`, calendarListener)
+        }
+      });
+      res();
+    })
   })
 });
 
