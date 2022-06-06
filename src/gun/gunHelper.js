@@ -9,7 +9,7 @@ import "gun/lib/radisk"
 import "gun/lib/store"
 import "gun/lib/rindexed"
 
-import {getRulesForPath, decryptByRule} from "./gunRulesHelper.js"
+import {getRulesForPath, decryptByRule, encryptByRule} from "./gunRulesHelper.js"
 require('gun/lib/unset.js')
 // let knownGunServer = ["http://localhost:1337/gun", "https://gun-manhattan.herokuapp.com/gun"]
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
@@ -91,7 +91,7 @@ const gunHelper = (function() {
         res({err:`Could not fetch ${path}(0)`, errData:[path]})
       }, maxRequestTime)
     }),
-    off: function (path, listener) {
+    off: (path, listener) => {
       let cleanPath = gunHelper.cleanPath(path)
       //Get Current Listeners for path
       let listeners = listenerMap.get(cleanPath) || []
@@ -109,6 +109,12 @@ const gunHelper = (function() {
 
       //TODO Probably better to add _ev to the map and remove the listeners individually if possible
       if(isLastListener && isLastListenerChange) gunHelper.getNodeByPath(cleanPath).off(); 
+    },
+    put: async (path, data, keyPair) => {
+      let cleanPath = gunHelper.cleanPath(path);
+      let rule = getRulesForPath(cleanPath);
+      let preparedData = await encryptByRule(rule, data, keyPair);
+      gunHelper.getNodeByPath(cleanPath).put(preparedData);
     },
     publicAppRoot: () => {
       if (!APP_KEY) throw new Error("[GUN_HELPER] App key is not set yet. Run gunHelper.appKey = KEY first.")

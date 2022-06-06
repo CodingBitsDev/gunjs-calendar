@@ -104,3 +104,19 @@ export async function decryptByRule(rule, data, parentPath, parentData){
 
   return dataIsObject ? { ...data } : data;
 }
+
+export async function encryptByRule(rule, data, keyPair){
+  if(data == null) return data;
+  let prepedData = data;
+  if(rule.type == "encUser"){
+    prepedData = await gunHelper.encryptUser(data); 
+  } else if ( rule.type == "enc"){
+    let key = null;
+    let keyPath = rule.keyPair || rule.key;
+    key = keyPair || await gunHelper.onceAsync(keyPath)
+    if(!key && !keyPair) throw new Error(`[EncryptByRule] Encryption key(${keyPath}) not found. Data at path: "${rule.path}" could not be encrypted`)
+    else prepedData = await SEA.encrypt(data, key)
+  }
+
+  return prepedData;
+}
