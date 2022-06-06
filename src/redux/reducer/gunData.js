@@ -99,8 +99,7 @@ export const editDate = createAsyncThunk("gunData/editDate", ({calendarId, month
     if(!date || !calendar || !monthId || !dateId) return rej();
 
     let newMonth = [...calendar.months[monthId].filter(date => date.id != dateId), date];
-    let encryptedMonth = await SEA.encrypt(newMonth, calendar.key)
-    gunHelper.getNodeByPath(`_user/calendars/${calendarId}/months/${monthId}`).put(encryptedMonth)
+    await gunHelper.put(`_user/calendars/${calendarId}/months/${monthId}`, newMonth)
     res()
   })
 });
