@@ -73,7 +73,7 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       isCurrentDay={isCurrentDay}
     />
     { hours.map(( hour, index) => {
-      let currentHour = new Date(day.date).setHours(index,0,0,0)
+      let currentHour = new Date(day.date).setHours(index+1,0,0,0)
       let smalltext = index + 1;
       smalltext = smalltext < 10? "0" + smalltext + ":00" : smalltext + ":00"
       return (

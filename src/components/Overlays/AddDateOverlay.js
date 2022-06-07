@@ -22,6 +22,12 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
     if(!selectedCalendar) setSelectedCalendar(calendarList[0][0])
   },[calendars])
 
+  useEffect(() => {
+    setStart(new Date(startDate))
+    setEnd(new Date(endDate))
+    setValue("name", name)
+  },[startDate, endDate, name])
+
 
 
   const onSubmit = (data) => {

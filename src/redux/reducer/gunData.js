@@ -85,10 +85,8 @@ export const addDate = createAsyncThunk("gunData/addDate", (data, thunkAPI) => {
   })
 });
 
-export const removeDate = createAsyncThunk("gunData/removeDate", ({monthId, date}, thunkAPI) => {
+export const removeDate = createAsyncThunk("gunData/removeDate", ({monthId, dateId, calendarId}, thunkAPI) => {
   return new Promise(async (res, rej) => {
-    let calendarId = date.calendarId;
-    let dateId = date?.id
     let calendar = thunkAPI.getState().gunData.calendars[calendarId];
     if(!calendar || !monthId || !dateId) return rej();
 

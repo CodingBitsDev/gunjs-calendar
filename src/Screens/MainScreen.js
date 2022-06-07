@@ -5,7 +5,7 @@ import CalendarWeek from "../components/CalendarWeek";
 import useOverlay from "../hooks/useOverlay";
 import AddDateOverlay from "../components/Overlays/AddDateOverlay";
 import { useDispatch, useSelector } from "react-redux";
-import { addDate, editDate } from "../redux/reducer/gunData";
+import { addDate, editDate, removeDate } from "../redux/reducer/gunData";
 
 let week = [
   { date:"05.22.2022", hours : [{start: "05.22.2022 10:00", end: "05.22.2022 12:30", what: "Bjoern"}]},
@@ -117,7 +117,9 @@ const MainScreen = () => {
       setOverlay(null)
     }
     let onDelete = () => {
+      dispatch(removeDate({monthId, calendarId: selectedDate.calendarId, dateId: selectedDate.id}))
 
+      setOverlay(null)
     }
     setOverlay(<AddDateOverlay name={name} startDate={start} endDate={end} onSave={onSave} onCancle={onCancle} onDelete={onDelete} isEdit/>)
   }

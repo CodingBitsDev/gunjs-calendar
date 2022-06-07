@@ -11,17 +11,25 @@ for (let index = 0; index < 60; index++) {
 }
 
 
-function DaySelect({ title, defaultValue, onSetDay, className}){
+function DaySelect({ key, title, defaultValue, onSetDay, className}){
   let [day, setDay] = useState(new Date(defaultValue || Date.now()))
   let [showDayPicker, setShowDayPicker] = useState(false)
   let [showTimePicker, setShowTimePicker] = useState(false)
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
 
   useEffect(() => {
-    let dayString = getDayString(day)
-    setValue("day", dayString)
-    setValue("time", getHourString(day.getHours(), day.getMinutes()))
-    onSetDay?.(day) 
+    setDay(new Date(defaultValue || Date.now()))  
+  },[defaultValue])
+
+  let prevDay = useRef();
+  useEffect(() => {
+    if(day.getTime() != prevDay.current){
+      prevDay.current = day.getTime();
+      let dayString = getDayString(day)
+      setValue("day", dayString)
+      setValue("time", getHourString(day.getHours(), day.getMinutes()))
+      onSetDay?.(day) 
+    }
   },[day])
 
   let prevActive = useRef("none")
@@ -57,7 +65,7 @@ function DaySelect({ title, defaultValue, onSetDay, className}){
   }
 
   return (
-    <div className={`w-full flex flex-col ${className}` }>
+    <div key={key} className={`w-full flex flex-col ${className}` }>
       <label className="text-white font-bold mb-2">{ title }</label>
       <div className="flex items-center justify-center">
         <div className={`w-full flex flex-col relative mr-2` }>
