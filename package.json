@@ -17,6 +17,7 @@
     "react-jss": "^10.9.0",
     "react-redux": "^8.0.2",
     "react-scripts": "5.0.1",
+    "react-select": "^5.3.2",
     "react-timeit": "^1.2.12",
     "react-tooltip": "^4.2.21",
     "redux": "^4.2.0",

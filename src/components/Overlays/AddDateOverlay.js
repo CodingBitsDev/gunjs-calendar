@@ -3,6 +3,7 @@ import { DayPicker } from 'react-day-picker';
 import { useForm } from "react-hook-form";
 import useGunValue from "../../gun/hooks/useGunValue";
 import DaySelect from "../DaySelect/DaySelect";
+import Select from 'react-select'
 
 function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit, calendars, dateId, calendarId}){
   let [start, setStart] = useState(new Date(startDate))
@@ -10,16 +11,16 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
   let [selectedCalendar, setSelectedCalendar] = useState(null)
 
-  let calendarList = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
-    return [calendarId, calendar?.name || "Unknwon"]
+  let calendarList = Object.entries(calendars || {}).map(([ calendarId, calendar ], index) => {
+    return { value: calendarId, label: calendar.name || `Unknown${index}`}
   })
 
   useEffect(() => {
-    let calendarList = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
-      return [calendarId, calendar?.name || "Unknwon"]
+    let calendarIds = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
+      return calendarId
     })
-    if(!calendarList.length) return
-    if(!selectedCalendar) setSelectedCalendar(calendarList[0][0])
+    if(!calendarIds.length) return
+    if(!calendarIds.includes(selectedCalendar)) setSelectedCalendar(calendarIds[0])
   },[calendars])
 
   useEffect(() => {
@@ -45,9 +46,16 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
     onDelete?.(calendarId, dateId);
   }
 
+  console.log("###", calendarList.find(c => c.value == selectedCalendar), selectedCalendar, calendarList)
+  const onCalendarChange = (data) => setSelectedCalendar(data.value)
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
-      <h1 className="text-white text-2xl font-bold mb-1">{isEdit ? "Edit Date" : "Select Date"}</h1>
+      <div className="flex">
+        <h1 className="text-white text-2xl font-bold mb-1">{isEdit ? "Edit Date" : "Select Date"}</h1>
+        <div className="flex-grow"/>
+        <Select onChange={onCalendarChange} value={calendarList.find(c => c.value == selectedCalendar)} className="h-6 mb-4 transform translate-x-4 scale-75" options={calendarList} />
+      </div>
       <div className="w-full border-b-2 h-0 mb-2 "></div>
       <label className="text-white font-bold mb-2">Name</label>
       <input required className="mb-5 px-2 rounded-md outline-none" placeholder="Name" defaultValue={name || ""} type={"text"} {...register("name")}/>

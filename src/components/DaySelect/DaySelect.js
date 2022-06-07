@@ -123,7 +123,7 @@ function getHourString(hour, minute){
 
 function getDayString(date){
   let day = date.getDate();
-  let month = date.getMonth();
+  let month = date.getMonth() + 1;
   let weekDays = date.getDay()
 
   let dayString = "";

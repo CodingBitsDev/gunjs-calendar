@@ -8,6 +8,7 @@ const initialState = {
   selectedCalendar: [],
   calendars: {},
   activeCalendars: [],
+  currentWeek: Date.now(),
 }
 
 export const createCalendar = createAsyncThunk("gunData/createCalendar", async (data, thunkAPI) => {
@@ -122,8 +123,10 @@ export const counterSlice = createSlice({
       let removed = payload.removed
       if(removed) delete state.calendars[calendarId];
       else state.calendars[calendarId] = payload.data;
+    },
+    setCurrentWeek: (state, { payload }) => {
+      if(payload.week) state.currentWeek = payload.week
     }
-
   },
   extraReducers: {
     [initGunData.pending]: (state, actions) => {},
@@ -145,6 +148,6 @@ export const counterSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { calendarLoaded } = counterSlice.actions
+export const { calendarLoaded, setCurrentWeek } = counterSlice.actions
 
 export default counterSlice.reducer
