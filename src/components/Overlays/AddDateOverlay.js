@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import useGunValue from "../../gun/hooks/useGunValue";
 import DaySelect from "../DaySelect/DaySelect";
 import Select from 'react-select'
+import { useSelector } from "react-redux";
 
 function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit, calendars, dateId, calendarId}){
   let [start, setStart] = useState(new Date(startDate))
@@ -11,17 +12,19 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
   let [selectedCalendar, setSelectedCalendar] = useState(null)
 
+  let activeCalendars = useSelector((state) => state?.gunData?.activeCalendars)
+
   let calendarList = Object.entries(calendars || {}).map(([ calendarId, calendar ], index) => {
     return { value: calendarId, label: calendar.name || `Unknown${index}`}
-  })
+  }).filter((c => activeCalendars.includes(c.value)))
 
   useEffect(() => {
     let calendarIds = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
       return calendarId
-    })
+    }).filter(id => activeCalendars.includes(id))
     if(!calendarIds.length) return
     if(!calendarIds.includes(selectedCalendar)) setSelectedCalendar(calendarIds[0])
-  },[calendars])
+  },[calendars, activeCalendars])
 
   useEffect(() => {
     setStart(new Date(startDate))

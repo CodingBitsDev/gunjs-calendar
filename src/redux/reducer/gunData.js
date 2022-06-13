@@ -126,6 +126,9 @@ export const counterSlice = createSlice({
     },
     setCurrentWeek: (state, { payload }) => {
       if(payload.week) state.currentWeek = payload.week
+    },
+    setActiveCalendars: (state, { payload }) => {
+      state.activeCalendars = payload.activeCalendars || []
     }
   },
   extraReducers: {
@@ -148,6 +151,6 @@ export const counterSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { calendarLoaded, setCurrentWeek } = counterSlice.actions
+export const { calendarLoaded, setCurrentWeek, setActiveCalendars } = counterSlice.actions
 
 export default counterSlice.reducer

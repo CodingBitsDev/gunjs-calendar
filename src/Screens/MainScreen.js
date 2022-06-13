@@ -6,6 +6,8 @@ import useOverlay from "../hooks/useOverlay";
 import AddDateOverlay from "../components/Overlays/AddDateOverlay";
 import { useDispatch, useSelector } from "react-redux";
 import { addDate, editDate, removeDate } from "../redux/reducer/gunData";
+import { IoSettingsSharp } from "react-icons/io5"
+import CalendarSelect from "../components/Overlays/CalendarSelect";
 
 let week = [
   { date:"05.22.2022", hours : [{start: "05.22.2022 10:00", end: "05.22.2022 12:30", what: "Bjoern"}]},
@@ -124,13 +126,21 @@ const MainScreen = () => {
     setOverlay(<AddDateOverlay name={name} startDate={start} endDate={end} onSave={onSave} onCancle={onCancle} onDelete={onDelete} isEdit/>)
   }
 
+  let openSettings = () => {
+    setOverlay(<CalendarSelect />)
+  }
+
   if(!initiated) return null;
   
   return (
     <div className="flex flex-col w-screen h-screen bg-black">
       <Header 
         title={"Calendar"}
-        rightElem={<WeekSelect/>}
+        rightElem={
+          <>
+            <WeekSelect/>
+            <IoSettingsSharp onClick={openSettings} className="ml-4 h-6 w-6 text-white cursor-pointer" />
+          </>}
       />
       <div className="w-full h-full">
         <CalendarWeek weekDays={week} onClickFree={clickFree} onClickHour={clickHour}/>
