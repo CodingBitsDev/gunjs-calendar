@@ -21,7 +21,7 @@ const Router = () => {
       {routeState == "main" && <MainScreen/>} 
 
       {!!overlay && (
-        <div style={{zIndex: 1000}} className="w-full h-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-auto h-auto">
+        <div style={{zIndex: 1000}} className="top-0 left-0 w-screen h-screen absolute flex justify-center items-center">
           {overlay}
         </div>
       )}
