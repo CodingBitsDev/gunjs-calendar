@@ -59,7 +59,6 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
   }
 
   const onCalendarChange = (data) => setSelectedCalendar(data.value)
-  console.log("###", calendars[calendarId], calendarId)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">

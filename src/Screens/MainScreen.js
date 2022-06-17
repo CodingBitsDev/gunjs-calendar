@@ -73,7 +73,6 @@ const MainScreen = () => {
   },[initiated, selectedWeek, calendars, activeCalendars])
 
   const clickFree = (date) => {
-    console.log(date)
     let start = new Date(date)
     let end = new Date(date)
     end.setHours(end.getHours()+1)
@@ -104,7 +103,6 @@ const MainScreen = () => {
     })
     if(!month) return;
     let monthId = month[0]
-    console.log(data)
     let start = new Date(data.start);
     let end = new Date(data.end);
     let name = data.what;

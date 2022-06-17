@@ -50,7 +50,7 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
         <>
           <div 
             className="absolute opacity-60 cursor-pointer"
-            style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.what || "") }}
+            style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.calendarId || "") }}
             data-tip={`What: ${hour.what}<br/>Start:${getHourString(startHour, startMinute)}<br/>End: ${getHourString(endHour, endMinute)}`}
             onClick={hourClicked}
           >
