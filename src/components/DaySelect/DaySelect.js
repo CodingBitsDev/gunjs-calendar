@@ -87,7 +87,11 @@ function DaySelect({ key, title, defaultValue, onSetDay, className}){
             </div>
           )}
         </div>
-        <div className="bg-white rounded-md">
+        <div 
+          onMouseEnter={() => setShowTimePicker(true)}
+          onMouseLeave={() => setShowTimePicker(false)}
+          className="bg-white rounded-md"
+        >
           <input 
             className={`w-16 rounded-md px-2 ${showTimePicker ? " rounded-b-none" : ""} focus-visible:outline-none select-none`}
             onClick={() => setShowTimePicker(!showTimePicker)}

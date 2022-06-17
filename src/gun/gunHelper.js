@@ -78,18 +78,19 @@ const gunHelper = (function() {
     },
     onceAsync: (keyPath, maxRequestTime = 5000) => new Promise(res => {
       let path  = gunHelper.cleanPath(keyPath);
-      let cancleInterval = null;
-
       let node = gunHelper.getNodeByPath(path)
+
+      let loaded = false;
+      let cancleInterval = setInterval(() => {
+        clearInterval(cancleInterval)
+        if(!loaded) return;
+        res({err:`Could not fetch ${path}(0)`, errData:[path]})
+      }, maxRequestTime)
       node.once(( data, key, _msg, _ev ) => {
         if(cancleInterval) clearInterval(cancleInterval);
         let rule = getRulesForPath(path);
         decryptByRule(rule, data).then(res)
       })
-      cancleInterval = setInterval(() => {
-        clearInterval(cancleInterval)
-        res({err:`Could not fetch ${path}(0)`, errData:[path]})
-      }, maxRequestTime)
     }),
     off: (path, listener) => {
       let cleanPath = gunHelper.cleanPath(path)

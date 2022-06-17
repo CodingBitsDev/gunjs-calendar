@@ -35,11 +35,10 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       let startMinute = (new Date(hour.start)).getMinutes()
       let endHour = (new Date(hour.end)).getHours() || hours.length +1
       let endMinute = (new Date(hour.end)).getMinutes()
-      let affectedHours = endMinute ? hours.slice(startHour-1, endHour) : hours.slice(startHour-1, endHour-1) 
+      let affectedHours = endMinute ? hours.slice(startHour-1, endHour-1) : hours.slice(startHour-1, endHour-1) 
 
       let startRef = affectedHours[0].getRef()
       let endRef = affectedHours[affectedHours.length -1].getRef()
-      console.log(hour.what, endRef, hours[hours.length-1].getRef(), endHour)
 
       let top = startRef.offsetTop + startRef.offsetHeight * (startMinute / 60)
       let height = ( endRef.offsetTop + 2 * endRef.offsetHeight ) - top - endRef.offsetHeight * ( 1 - endMinute / 60 ) ;
