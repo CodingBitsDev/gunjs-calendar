@@ -46,7 +46,7 @@ export const removeCalendar = createAsyncThunk("gunData/removeCalendar", async (
       if(!calendarId) return rej();
       let activeCalendars = await gunHelper.onceAsync("_user/activeCalendars");
       if(activeCalendars.includes(calendarId)){
-        activeCalendars = activeCalendars.filter(i => i == calendarId);
+        activeCalendars = activeCalendars.filter(i => i != calendarId);
         await gunHelper.put("_user/activeCalendars", activeCalendars)
       }
       await gunHelper.put(`_user/calendars/${calendarId}`, null);
