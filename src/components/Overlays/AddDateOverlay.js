@@ -19,6 +19,7 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
     return { value: calendarId, label: calendar.name || `Unknown${index}`}
   }).filter((c => activeCalendars.includes(c.value)))
 
+  useEffect(() => {setFocus("name")},[])
   useEffect(() => {
     let startDate = new Date(start)
     let endDate = new Date(end)
@@ -86,6 +87,7 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
         onSetDay={setStart}
       />
       {<DaySelect title={"End"} defaultValue={end} onSetDay={setEnd}/>}
+      <input className="hidden" type="submit" />
       <div className="mt-6 flex">
         { isEdit && (
           <button onClick={deletePressed} className="bg-red-700 text-white rounded-md grow mr-4" > Remove </button>
@@ -99,7 +101,6 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
         <button 
           style={{ backgroundColor: "#5350ff" }}
           className="rounded-md grow text-white"
-          type="submit"
         >
           Save
         </button>
