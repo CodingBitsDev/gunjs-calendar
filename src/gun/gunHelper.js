@@ -14,7 +14,7 @@ require('gun/lib/unset.js')
 // let knownGunServer = ["http://localhost:1337/gun", "https://gun-manhattan.herokuapp.com/gun"]
 // let knownGunServer = ["https://gun-manhattan.herokuapp.com/gun"]
 
-export const gun = GUN(["https://gun.nilsr.me/gun", "https://gun-manhattan.herokuapp.com/gun"]);
+export const gun = GUN(["/gun","https://gun.nilsr.me/gun", "https://gun-manhattan.herokuapp.com/gun"]);
 
 const gunHelper = (function() {
   let APP_KEY = ""
