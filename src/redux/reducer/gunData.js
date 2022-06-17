@@ -82,7 +82,12 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
 
     gunHelper.on("_user/calendars", (calendars, gunKey, _msg, _ev) => {
     //Download Calendars
+      let removedCalendars = Object.entries(calendars).filter(([key, val]) => key != "_" && !val).map(([key]) => key)
+      let currentCalendars = thunkAPI.getState()?.gunData?.calendars;
+      if(removedCalendars.some(key => !!currentCalendars[key])) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars}));
+
       let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val).filter(Boolean)
+      console.log("### cal", removedCalendars, calendarList)
       calendarList.forEach(async ([key, data]) => {
         if( !trackedCalendars.includes(key)){
           let lastLoaded = 0;
@@ -171,6 +176,12 @@ export const counterSlice = createSlice({
       if(removed) delete state.calendars[calendarId];
       else state.calendars[calendarId] = payload.data;
     },
+    updateRemovedCalendars: (state, { payload }) => {
+      let removedCalendars = payload.removedCalendars || [];
+      removedCalendars.forEach(key => {
+        delete state.calendars[key]
+      })
+    },
     setCurrentWeek: (state, { payload }) => {
       if(payload.week) state.currentWeek = payload.week
     },
@@ -203,6 +214,6 @@ export const counterSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { calendarLoaded, setCurrentWeek, updateActiveCalendars } = counterSlice.actions
+export const { calendarLoaded, setCurrentWeek, updateActiveCalendars, updateRemovedCalendars } = counterSlice.actions
 
 export default counterSlice.reducer
