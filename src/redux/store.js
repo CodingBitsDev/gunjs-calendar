@@ -10,5 +10,6 @@ export const store = configureStore({
 window.store = store;
 
 onSignedIn((signedIn) => {
+  console.log("####")
   if(signedIn) store.dispatch(initGunData())
 })

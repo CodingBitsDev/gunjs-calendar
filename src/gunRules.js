@@ -1,6 +1,7 @@
 module.exports = {
   "_user":{
     "auth_pin": { "type": "encUser" },
+    "activeCalendars":{"type": "encUser"},
     "calendars":{
       "$calendarId":{
         "key": { "type": "encUser" },

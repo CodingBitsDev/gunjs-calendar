@@ -28,6 +28,10 @@ export const createCalendar = createAsyncThunk("gunData/createCalendar", async (
         gunHelper.put(`_user/calendars/${calendarKey}/months/${currentMonthKey}`, []),
       ])
 
+      let activeCalendars = await gunHelper.onceAsync("_user/activeCalendars") || [];
+      activeCalendars.push(calendarKey)
+      await gunHelper.put("_user/activeCalendars", activeCalendars)
+
       res();
     } catch(e){
       rej(e)
@@ -40,7 +44,11 @@ export const removeCalendar = createAsyncThunk("gunData/removeCalendar", async (
     try{
       let calendarId = data.calendarId;
       if(!calendarId) return rej();
-
+      let activeCalendars = await gunHelper.onceAsync("_user/activeCalendars");
+      if(activeCalendars.includes(calendarId)){
+        activeCalendars = activeCalendars.filter(i => i == calendarId);
+        await gunHelper.put("_user/activeCalendars", activeCalendars)
+      }
       await gunHelper.put(`_user/calendars/${calendarId}`, null);
 
       res({ calendarId });
@@ -50,9 +58,28 @@ export const removeCalendar = createAsyncThunk("gunData/removeCalendar", async (
   })
 });
 
+export const setActiveCalendars = createAsyncThunk("gunData/setActiveCalendars", async (data, thunkAPI) => {
+  return new Promise(async (res, rej) => {
+    try{
+      if(!data.activeCalendars) return rej();
+
+      await gunHelper.put(`_user/activeCalendars`, data.activeCalendars);
+
+      res();
+    } catch(e){
+      rej(e)
+    }
+  })
+});
+
 let trackedCalendars = []
 export const initGunData = createAsyncThunk("gunData/initGunData", async (data, thunkAPI) => {
-  return new Promise((res, rej) => {
+  return new Promise(async (res, rej) => {
+    let activeCalendars = await gunHelper.onceAsync("_user/activeCalendars");
+    gunHelper.on("_user/activeCalendars", (activeCalendars) => {
+      if(activeCalendars) thunkAPI.dispatch(updateActiveCalendars({activeCalendars}))
+    })
+
     gunHelper.on("_user/calendars", (calendars, gunKey, _msg, _ev) => {
     //Download Calendars
       let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val).filter(Boolean)
@@ -76,6 +103,11 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
           gunHelper.on(`_user/calendars/${key}`, calendarListener)
         }
       });
+
+      if(!activeCalendars) {
+        activeCalendars = calendarList.map(([key]) => key)
+        gunHelper.put("_user/activeCalendars", activeCalendars);
+      }
 
       //Set loaded calendars to active
       res({activeCalendars: calendarList.map(([key]) => key), existentCalendar: calendarList.map(([key]) => key)});
@@ -142,7 +174,7 @@ export const counterSlice = createSlice({
     setCurrentWeek: (state, { payload }) => {
       if(payload.week) state.currentWeek = payload.week
     },
-    setActiveCalendars: (state, { payload }) => {
+    updateActiveCalendars: (state, { payload }) => {
       state.activeCalendars = payload.activeCalendars || []
     }
   },
@@ -171,6 +203,6 @@ export const counterSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { calendarLoaded, setCurrentWeek, setActiveCalendars } = counterSlice.actions
+export const { calendarLoaded, setCurrentWeek, updateActiveCalendars } = counterSlice.actions
 
 export default counterSlice.reducer

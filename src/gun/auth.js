@@ -66,7 +66,7 @@ export function signIn(name, pw, persist){
       let onPersistError = (e) => {
         console.e("Could not persist user", e)
       };
-      await persistUser(name, pw, persist).then((persistResult) => {
+      persistUser(name, pw, persist).then((persistResult) => {
         if(!persistResult && persist) onPersistError(persistResult)
         notifySignInListener(true);
         resolve(user)
