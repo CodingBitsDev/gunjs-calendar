@@ -66,8 +66,6 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
     setSelectedCalendar(data.value)
   }
 
-  console.log(calendarList, calendarList.find(c => c.value == selectedCalendar), selectedCalendar)
-
   return (
     <div className="w-screen h-screen pointer-events-none flex items-center justify-center">
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit)} className="pointer-events-auto w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">

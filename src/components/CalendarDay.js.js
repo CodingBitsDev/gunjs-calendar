@@ -31,14 +31,16 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
   let hoursComponents = [];
   if(renderd){
     day.hours.forEach((hour) => {
-      let startHour = (new Date(hour.start)).getHours()
-      let startMinute = (new Date(hour.start)).getMinutes()
-      let endHour = (new Date(hour.end)).getHours() || hours.length +1
-      let endMinute = (new Date(hour.end)).getMinutes()
-      let affectedHours = endMinute ? hours.slice(startHour-1, endHour-1) : hours.slice(startHour-1, endHour-1) 
+      let startHour = (new Date(hour.startDay)).getHours()
+      let startMinute = (new Date(hour.startDay)).getMinutes()
+      let endHour = (new Date(hour.endDay)).getHours() || hours.length +1
+      let endMinute = (new Date(hour.endDay)).getMinutes()
+      let affectedHours = hours.slice(startHour, endHour) 
 
+      console.log("###", startHour, endHour, affectedHours)
       let startRef = affectedHours[0].getRef()
       let endRef = affectedHours[affectedHours.length -1].getRef()
+      // if(!startRef || !endRef) return;
 
       let top = startRef.offsetTop + startRef.offsetHeight * (startMinute / 60)
       let height = ( endRef.offsetTop + 2 * endRef.offsetHeight ) - top - endRef.offsetHeight * ( 1 - endMinute / 60 ) ;
@@ -46,12 +48,14 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
 
       let hourClicked = () => { onClickHour && onClickHour(hour) }
 
+      let startText = getDayString(new Date(hour.start)) + " " + getHourStringFromDate(new Date(hour.start))
+      let endText = getDayString(new Date(hour.end)) + " " + getHourStringFromDate(new Date(hour.end))
       hoursComponents.push(
         <>
           <div 
             className="absolute opacity-60 cursor-pointer"
             style={{top: `${affectedHours}px`, width, height, top, left:0, backgroundColor: stringToColour(hour.calendarId || "") }}
-            data-tip={`What: ${hour.what}<br/>Start:${getHourString(startHour, startMinute)}<br/>End: ${getHourString(endHour, endMinute)}`}
+            data-tip={`What: ${hour.what}<br/>Start: ${startText}<br/>End: ${endText}`}
             onClick={hourClicked}
           >
           </div>
@@ -73,8 +77,8 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       isCurrentDay={isCurrentDay}
     />
     { hours.map(( hour, index) => {
-      let currentHour = new Date(day.date).setHours(index+1,0,0,0)
-      let smalltext = index + 1;
+      let currentHour = new Date(day.date).setHours(index,0,0,0)
+      let smalltext = index;
       smalltext = smalltext < 10? "0" + smalltext + ":00" : smalltext + ":00"
       return (
         <CalendarHour 
@@ -108,6 +112,16 @@ function stringToColour(str) {
 }
 
 function getHourString(hour, minute){
+  let hourString = Number(hour) > 9 ? hour : "0" + hour;
+  hourString += ":"
+  if(!minute) hourString += "00";
+  else hourString += Number(minute) > 9 ? minute : "0" + minute
+  return hourString;
+}
+
+function getHourStringFromDate(date){
+  let hour = date.getHours()
+  let minute = date.getMinutes()
   let hourString = Number(hour) > 9 ? hour : "0" + hour;
   hourString += ":"
   if(!minute) hourString += "00";

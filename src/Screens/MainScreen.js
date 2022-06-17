@@ -6,7 +6,7 @@ import useOverlay from "../hooks/useOverlay";
 import AddDateOverlay from "../components/Overlays/AddDateOverlay";
 import { useDispatch, useSelector } from "react-redux";
 import { addDate, editDate, removeDate } from "../redux/reducer/gunData";
-import { IoSettingsSharp } from "react-icons/io5"
+import { IoNuclearOutline, IoSettingsSharp } from "react-icons/io5"
 import CalendarSelect from "../components/Overlays/CalendarSelect";
 
 let week = [
@@ -56,16 +56,37 @@ const MainScreen = () => {
     for (let i = 0; i < 7; i++) {
       let day = selectedWeek + i * 1000 * 60 * 60 * 24;
       let nextDay = day + 1000 * 60 * 60 * 24;
-      let hours = dates.filter(date => {
-        return date.date.start > day && date.date.end <= nextDay;
-      }).map((date) => ({
-        start: date.date.start,
-        end: date.date.end,
-        what: date.name,
-        calendarId: date.calendarId,
-        id: date.id
-      }))
-      newWeek.push({date: day, hours}) 
+      let hours = dates.map((date) => {
+        let {start, end} = date.date;
+        let dayMs = 1000 * 60 * 60 * 24;
+        let daysBetween = Math.floor(( end - start ) / dayMs)
+        let daysUntilStart = Math.floor(( start - day ) / dayMs); 
+        let daysUntilEnd = Math.floor(( end - day ) / dayMs); 
+        let startDay = start;
+        let endDay = end;
+        if(startDay < day){
+          if(daysUntilEnd < 0 ) return null
+          else {
+            console.log("#a", daysUntilEnd, daysUntilStart, daysBetween)
+            startDay = day 
+          }
+        }
+        if(end > nextDay){
+          if(-daysUntilStart < 0) return null; 
+          endDay = nextDay; 
+        }
+
+        return ({
+          start: date.date.start, 
+          end: date.date.end,
+          startDay: startDay, //Used for display of date in day
+          endDay: endDay, // Use for display of date in day
+          what: date.name,
+          calendarId: date.calendarId,
+          id: date.id
+        })
+      }).filter(Boolean)
+      newWeek.push({date: day, hours: hours}) 
       day = nextDay;
     }
 
