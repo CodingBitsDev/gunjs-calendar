@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import AddDateOverlay from "./components/Overlays/AddDateOverlay";
 import useGunAuth from "./gun/hooks/useGunAuth";
 import useOverlay from "./hooks/useOverlay";
 import AuthScreen from "./Screens/AuthScreen";

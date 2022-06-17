@@ -6,11 +6,12 @@ import DaySelect from "../DaySelect/DaySelect";
 import Select from 'react-select'
 import { useSelector } from "react-redux";
 
-function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit, calendars, dateId, calendarId}){
+function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, isEdit, dateId, calendarId}){
   let [start, setStart] = useState(new Date(startDate))
   let [end, setEnd] = useState(new Date(endDate || Date.now()))
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
   let [selectedCalendar, setSelectedCalendar] = useState(null)
+  let calendars = useSelector(state => state.gunData.calendars)
 
   let activeCalendars = useSelector((state) => state?.gunData?.activeCalendars)
 
@@ -57,15 +58,19 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
     onDelete?.(calendarId, dateId);
   }
 
-  console.log("###", calendarList.find(c => c.value == selectedCalendar), selectedCalendar, calendarList)
   const onCalendarChange = (data) => setSelectedCalendar(data.value)
+  console.log("###", calendars[calendarId], calendarId)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
       <div className="flex">
         <h1 className="text-white text-2xl font-bold mb-1">{isEdit ? "Edit Date" : "Select Date"}</h1>
         <div className="flex-grow"/>
-        <Select onChange={onCalendarChange} value={calendarList.find(c => c.value == selectedCalendar)} className="h-6 mb-4 transform translate-x-4 scale-75" options={calendarList} />
+        {!isEdit ? (
+          <Select onChange={onCalendarChange} value={calendarList.find(c => c.value == selectedCalendar)} className="h-6 mb-4 transform translate-x-4 scale-75" options={calendarList} />
+        ) : (
+          <h2 className="text-white">{calendars[calendarId]?.name}</h2>
+        )}
       </div>
       <div className="w-full border-b-2 h-0 mb-2 "></div>
       <label className="text-white font-bold mb-2">Name</label>

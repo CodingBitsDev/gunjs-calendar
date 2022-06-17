@@ -87,7 +87,6 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
       if(removedCalendars.some(key => !!currentCalendars[key])) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars}));
 
       let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val).filter(Boolean)
-      console.log("### cal", removedCalendars, calendarList)
       calendarList.forEach(async ([key, data]) => {
         if( !trackedCalendars.includes(key)){
           let lastLoaded = 0;

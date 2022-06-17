@@ -88,7 +88,7 @@ const MainScreen = () => {
     let onCancle = () => {
       setOverlay(null)
     }
-    setOverlay(<AddDateOverlay startDate={start} endDate={end} onSave={onSave} onCancle={onCancle} calendars={calendars}/>)
+    setOverlay(<AddDateOverlay startDate={start} endDate={end} onSave={onSave} onCancle={onCancle}/>)
   }
 
   const clickHour = ( data ) => {
@@ -123,7 +123,7 @@ const MainScreen = () => {
 
       setOverlay(null)
     }
-    setOverlay(<AddDateOverlay name={name} startDate={start} endDate={end} onSave={onSave} onCancle={onCancle} onDelete={onDelete} isEdit/>)
+    setOverlay(<AddDateOverlay calendarId={data.calendarId} name={name} startDate={start} endDate={end} onSave={onSave} onCancle={onCancle} onDelete={onDelete} isEdit/>)
   }
 
   let openSettings = () => {

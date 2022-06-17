@@ -25,7 +25,7 @@ function CalendarSelect({}){
         name: calendar.name || `Unknown${index}`,
         active: activeCalendars.includes(calendarId)
       }
-    })
+    }).sort((calA, calB) => calA.name.localeCompare(calB.name))
     setCalendarList(list)
   },[calendars, activeCalendars])
 
