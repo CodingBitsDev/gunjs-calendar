@@ -19,6 +19,14 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
   }).filter((c => activeCalendars.includes(c.value)))
 
   useEffect(() => {
+    let startDate = new Date(start)
+    let endDate = new Date(end)
+    if(startDate.getTime() > endDate.getTime()){
+      setEnd(startDate.getTime() + 1000*60*60);
+    }
+  },[start, end])
+
+  useEffect(() => {
     let calendarIds = Object.entries(calendars || {}).map(([ calendarId, calendar ]) => {
       return calendarId
     }).filter(id => activeCalendars.includes(id))
