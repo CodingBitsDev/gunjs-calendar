@@ -23,12 +23,27 @@ export const createCalendar = createAsyncThunk("gunData/createCalendar", async (
       let keyPair = await SEA.pair();
       await gunHelper.put(`_user/calendars/${calendarKey}/key`, keyPair);
       await Promise.all([
-        gunHelper.put(`_user/calendars/${calendarKey}/name`, "Main" ),
+        gunHelper.put(`_user/calendars/${calendarKey}/name`, data.name || "Main" ),
         gunHelper.put(`_user/calendars/${calendarKey}/owner`, gunHelper.onceAsync("_user/name") ),
         gunHelper.put(`_user/calendars/${calendarKey}/months/${currentMonthKey}`, []),
       ])
 
       res();
+    } catch(e){
+      rej(e)
+    }
+  })
+});
+
+export const removeCalendar = createAsyncThunk("gunData/removeCalendar", async (data, thunkAPI) => {
+  return new Promise(async (res, rej) => {
+    try{
+      let calendarId = data.calendarId;
+      if(!calendarId) return rej();
+
+      await gunHelper.put(`_user/calendars/${calendarId}`, null);
+
+      res({ calendarId });
     } catch(e){
       rej(e)
     }
@@ -132,6 +147,11 @@ export const counterSlice = createSlice({
     }
   },
   extraReducers: {
+    [removeCalendar.fulfilled]: (state, action) => {
+      let calendarId = action.payload.calendarId;
+      if(!calendarId) return;
+      delete state.calendars[calendarId]
+    },
     [initGunData.pending]: (state, actions) => {},
     [initGunData.fulfilled]: (state, {payload}) => {
       state.initiated = true;

@@ -9,8 +9,9 @@ import useOverlay from "../../hooks/useOverlay";
 import { IoAddCircle, IoCalendarNumber, IoToggle } from "react-icons/io5";
 import { ImCheckboxUnchecked, ImCheckboxChecked } from "react-icons/im";
 import { MdDelete } from "react-icons/md";
-import { setActiveCalendars } from "../../redux/reducer/gunData";
+import { createCalendar, removeCalendar, setActiveCalendars } from "../../redux/reducer/gunData";
 import YesNoModal from "./YesNoModal";
+import AddCalendarOverlay from "./AddCalendarOverlay";
 
 function CalendarSelect({}){
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
@@ -48,14 +49,25 @@ function CalendarSelect({}){
   })
 
   let addCalendarPressed=() => {
-    alert("TODO")
+    setOverlay(
+    <AddCalendarOverlay
+      onSave={(name) => {
+        dispatch(createCalendar({name}))
+        setOverlay(<CalendarSelect/>)
+      }}
+      onCancle={() => {
+        setOverlay(<CalendarSelect/>)
+      }}
+    />)
   }
 
   let onRemove = (calendarId, name) => {
     setOverlay(<YesNoModal 
       title="Remove Calendar"
       text={`Are you sure you want to remove calendar ${name}. This cannot be undone`}
-      onYes={() => {setOverlay(<CalendarSelect />)}}
+      onYes={() => {
+        dispatch(removeCalendar({calendarId}))
+        setOverlay(<CalendarSelect />)}}
       onNo={() => {setOverlay(<CalendarSelect />)}}
 
     />)
