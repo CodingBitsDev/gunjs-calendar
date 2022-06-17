@@ -10,7 +10,7 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
   let [start, setStart] = useState(new Date(startDate))
   let [end, setEnd] = useState(new Date(endDate || Date.now()))
   const { setFocus, register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
-  let [selectedCalendar, setSelectedCalendar] = useState(null)
+  let [selectedCalendar, setSelectedCalendar] = useGunValue("_user/selectedCalendar")
   let calendars = useSelector(state => state.gunData.calendars)
 
   let activeCalendars = useSelector((state) => state?.gunData?.activeCalendars)
@@ -32,8 +32,11 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
       return calendarId
     }).filter(id => activeCalendars.includes(id))
     if(!calendarIds.length) return
-    if(!calendarIds.includes(selectedCalendar)) setSelectedCalendar(calendarIds[0])
+    if(!calendarIds.includes(selectedCalendar) && selectedCalendar != undefined) {
+      setSelectedCalendar(calendarIds[0])
+    }
   },[calendars, activeCalendars])
+
 
   useEffect(() => {
     setStart(new Date(startDate))
@@ -58,7 +61,9 @@ function AddDateOverlay({ startDate, endDate, name, onSave, onCancle, onDelete, 
     onDelete?.(calendarId, dateId);
   }
 
-  const onCalendarChange = (data) => setSelectedCalendar(data.value)
+  const onCalendarChange = (data) => {
+    setSelectedCalendar(data.value)
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
