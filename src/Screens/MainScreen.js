@@ -64,10 +64,10 @@ const MainScreen = () => {
         let daysUntilEnd = Math.floor(( end - day ) / dayMs); 
         let startDay = start;
         let endDay = end;
-        if(startDay < day){
-          if(daysUntilEnd < 0 ) return null
+        if(startDay <= day){
+          if(daysUntilEnd < 0 || day == end) return null
           else {
-            console.log("#a", daysUntilEnd, daysUntilStart, daysBetween)
+            console.log("#a", daysUntilEnd)
             startDay = day 
           }
         }
