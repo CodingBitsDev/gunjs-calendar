@@ -3,7 +3,7 @@ import React from "react";
 const Header = ({title, rightElem}) => {
   return (
     <div 
-      className="w-full h-16 bg-gray-900 flex items-center pl-4 pr-4"
+      className="w-full h-16 bg-gray-900 flex items-center pl-4 pr-4 sticky top-0 left-0 z-50"
     >
       <h1 className="text-white text-2xl font-bold">{title}</h1>
       <div className="grow"/>
