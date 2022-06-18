@@ -89,21 +89,17 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
       let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val).filter(Boolean)
       calendarList.forEach(async ([key, data]) => {
         if( !trackedCalendars.includes(key)){
-          let lastLoaded = 0;
           trackedCalendars.push(key)
-          const calendarListener = (calendar) => {
+          const calendarListener = (function (calendar){
             if(calendar == null) {
               gunHelper.off(`_user/calendars/${key}`, calendarListener)
               return
             }
             let now = Date.now()
-            if(lastLoaded < now-100){
-              lastLoaded = now
-              gunHelper.load(`_user/calendars/${key}`, (data => {
-                thunkAPI.dispatch(calendarLoaded({ key, data }))
-              }))
-            }
-          }
+            gunHelper.load(`_user/calendars/${key}`, (data => {
+              thunkAPI.dispatch(calendarLoaded({ key, data }))
+            }))
+          }).debounce(1000)
           gunHelper.on(`_user/calendars/${key}`, calendarListener)
         }
       });
@@ -132,8 +128,8 @@ export const addDate = createAsyncThunk("gunData/addDate", (data, thunkAPI) => {
     let calendarMonthKey = calendarMonth.getTime();
 
     let newMonth = [...( calendar.months[calendarMonthKey] || [] ), {...data, id: uuid()}]
-    res({ calendarId, monthId:calendarMonthKey, newMonth })
     await gunHelper.put(`_user/calendars/${calendarId}/months/${calendarMonthKey}`, newMonth)
+    res({ calendarId, monthId:calendarMonthKey, newMonth })
   })
 });
 
@@ -143,8 +139,8 @@ export const removeDate = createAsyncThunk("gunData/removeDate", ({monthId, date
     if(!calendar || !monthId || !dateId) return rej();
 
     let newMonth = calendar.months[monthId].filter(date => date.id != dateId);
-    res({ calendarId, monthId, newMonth })
     await gunHelper.put(`_user/calendars/${calendarId}/months/${monthId}`, newMonth)
+    res({ calendarId, monthId, newMonth })
   })
 });
 
@@ -156,8 +152,8 @@ export const editDate = createAsyncThunk("gunData/editDate", ({monthId, date }, 
     if(!date || !calendar || !monthId || !dateId) return rej();
 
     let newMonth = [...calendar.months[monthId].filter(date => date.id != dateId), date];
-    res({calendarId, monthId, newMonth})
     await gunHelper.put(`_user/calendars/${calendarId}/months/${monthId}`, newMonth)
+    res({calendarId, monthId, newMonth})
   })
 });
 
@@ -210,16 +206,16 @@ export const counterSlice = createSlice({
 
     },
     [addDate.fulfilled]: (state, {payload}) => {
-      // let {calendarId, monthId, newMonth} = payload;
-      // state.calendars[calendarId].months[monthId] = newMonth
+      let {calendarId, monthId, newMonth} = payload;
+      state.calendars[calendarId].months[monthId] = newMonth
     },
     [removeDate.fulfilled]: (state, {payload}) => {
-      // let {calendarId, monthId, newMonth} = payload;
-      // state.calendars[calendarId].months[monthId] = newMonth
+      let {calendarId, monthId, newMonth} = payload;
+      state.calendars[calendarId].months[monthId] = newMonth
     },
     [editDate.fulfilled]: (state, {payload}) => {
-      // let {calendarId, monthId, newMonth} = payload;
-      // state.calendars[calendarId].months[monthId] = newMonth
+      let {calendarId, monthId, newMonth} = payload;
+      state.calendars[calendarId].months[monthId] = newMonth
     },
   }
 })

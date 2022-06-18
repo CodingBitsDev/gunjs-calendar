@@ -70,7 +70,7 @@ function CalendarSelect({}){
   }
 
   return (
-    <form onSubmit={handleSubmit(onDone)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
+    <form autoComplete="off" onSubmit={handleSubmit(onDone)} className="w-auto h-auto bg-black p-6 flex flex-col border-2 border-white rounded-xl relative">
       <div className="flex items-center justify-between">
         <h1 className="text-white text-2xl font-bold mb-1">{`Active Calendars`}</h1>
         <IoAddCircle onClick={addCalendarPressed} className="text-green-500 ml-4 h-6 w-6 cursor-pointer"/>
