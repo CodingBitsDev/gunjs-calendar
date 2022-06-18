@@ -82,11 +82,14 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
 
     gunHelper.on("_user/calendars", (calendars, gunKey, _msg, _ev) => {
     //Download Calendars
-      let removedCalendars = Object.entries(calendars).filter(([key, val]) => key != "_" && !val).map(([key]) => key)
+      let removedCalendars = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && !val).map(([key]) => key)
       let currentCalendars = thunkAPI.getState()?.gunData?.calendars;
       if(removedCalendars.some(key => !!currentCalendars[key])) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars}));
 
-      let calendarList = Object.entries(calendars).filter(([key, val]) => key != "_" && val).filter(Boolean)
+      let calendarList = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && val).filter(Boolean)
+      if(!calendarList.length) {
+        thunkAPI.dispatch(createCalendar({name: "Main"}))
+      }
       calendarList.forEach(async ([key, data]) => {
         if( !trackedCalendars.includes(key)){
           trackedCalendars.push(key)
