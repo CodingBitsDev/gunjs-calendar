@@ -210,16 +210,16 @@ export const counterSlice = createSlice({
 
     },
     [addDate.fulfilled]: (state, {payload}) => {
-      let {calendarId, monthId, newMonth} = payload;
-      state.calendars[calendarId].months[monthId] = newMonth
+      // let {calendarId, monthId, newMonth} = payload;
+      // state.calendars[calendarId].months[monthId] = newMonth
     },
     [removeDate.fulfilled]: (state, {payload}) => {
-      let {calendarId, monthId, newMonth} = payload;
-      state.calendars[calendarId].months[monthId] = newMonth
+      // let {calendarId, monthId, newMonth} = payload;
+      // state.calendars[calendarId].months[monthId] = newMonth
     },
     [editDate.fulfilled]: (state, {payload}) => {
-      let {calendarId, monthId, newMonth} = payload;
-      state.calendars[calendarId].months[monthId] = newMonth
+      // let {calendarId, monthId, newMonth} = payload;
+      // state.calendars[calendarId].months[monthId] = newMonth
     },
   }
 })
