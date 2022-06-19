@@ -11,14 +11,14 @@ const PinForm = ({ onEnterPin }) => {
   return (
     <>
       <form 
-        className="flex w-full"
+        className="flex w-full justify-between"
         onSubmit={handleSubmit(({pin}) => {
           onEnterPin(pin)
         })}
       >
-        <input className="bg-black p-2 rounded mr-5 text-white placeholder-gray-100" type="password" placeholder="Pin" {...register("pin")}/>
-        <div className="grow"/>
-        <input className="bg-black p-2 rounded text-white placeholder-gray-100" type="submit" value="Enter Pin"/>
+        <input className="bg-black p-2 rounded text-white placeholder-gray-100 w-1/2" type="password" placeholder="Pin" {...register("pin")}/>
+        <input className="hidden" type="submit"></input>
+        <button className="bg-black p-2 rounded text-white placeholder-gray-100 h-fit w-1/4" type="submit">Enter Pin</button>
       </form>
     </>
   )

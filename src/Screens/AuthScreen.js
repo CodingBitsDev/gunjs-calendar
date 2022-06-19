@@ -19,8 +19,8 @@ const AuthScreen = () => {
   if(!( usePin && showPin ) && !showSignUp) headerState = "signIn";
 
   return (
-    <div className="App flex flex-col items-center p-10 bg-black w-screen h-screen">
-      <div className="bg-gray-100 p-12 rounded-lg flex-col">
+    <div className="flex flex-col items-center pt-10 bg-black w-screen h-screen">
+      <div className="bg-gray-100 p-12 m-10 rounded-lg flex-col max-w-full flex">
         <LoginHeader state={ headerState } setUsePin={setUsePin} setShowSignUp={setShowSignUp}/>
         {!( usePin && showPin ) && showSignUp && <SignUpForm onSignUp={signUp}/> }
         {!( usePin && showPin ) && !showSignUp && <SignInForm onSignIn={signIn}/> }
