@@ -11,6 +11,18 @@ module.exports = {
           "$monthId": { "type": "enc", "keyPair": "_user/calendars/{calendarId}/key"}
         }
       }
+    },
+    "sharedCalendars":{
+      "$calendarId":{
+        "key": { "type": "encUser" },
+        "calendar": {
+          "name": { "type": "enc", "keyPair": "_user/sharedCalendars/{calendarId}/key"},
+          "months": { 
+            "$monthId": { "type": "enc", "keyPair": "_user/sharedCalendars/{calendarId}/key"},
+          }
+        }
+      }
+
     }
   }
 }

@@ -7,6 +7,7 @@ const initialState = {
   initiated: false,
   selectedCalendar: [],
   calendars: {},
+  sharedCalendars: {},
   activeCalendars: [],
   currentWeek: Date.now(),
 }
@@ -115,6 +116,40 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
       //Set loaded calendars to active
       res({activeCalendars: calendarList.map(([key]) => key), existentCalendar: calendarList.map(([key]) => key)});
     })
+
+    // gunHelper.on("_user/sharedCalendars", (calendars, gunKey, _msg, _ev) => {
+    //   //Download Calendars
+    //   let removedCalendars = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && !val).map(([key]) => key)
+    //   let currentCalendars = thunkAPI.getState()?.gunData?.calendars;
+    //   if(removedCalendars.some(key => !!currentCalendars[key])) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars}));
+
+    //   let calendarList = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && val).filter(Boolean)
+    //   calendarList.forEach(async ([key, data]) => {
+    //     let sharedCalendarData = await gunHelper.onceAsync("_user/sharedCalendars")
+    //     if( !trackedCalendars.includes(key)){
+    //       trackedCalendars.push(key)
+    //       const calendarListener = (function (calendar){
+    //         if(calendar == null) {
+    //           gunHelper.off(`_user/calendars/${key}`, calendarListener)
+    //           return
+    //         }
+    //         let now = Date.now()
+    //         gunHelper.load(`_user/calendars/${key}`, (data => {
+    //           thunkAPI.dispatch(calendarLoaded({ key, data }))
+    //         }))
+    //       }).debounce(1000)
+    //       gunHelper.on(`_user/calendars/${key}`, calendarListener)
+    //     }
+    //   });
+
+    //   if(!activeCalendars) {
+    //     activeCalendars = calendarList.map(([key]) => key)
+    //     gunHelper.put("_user/activeCalendars", activeCalendars);
+    //   }
+
+    //   //Set loaded calendars to active
+    //   res({activeCalendars: calendarList.map(([key]) => key), existentCalendar: calendarList.map(([key]) => key)});
+    // })
   })
 });
 
