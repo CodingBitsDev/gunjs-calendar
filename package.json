@@ -9,7 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@wojtekmaj/react-timerange-picker": "^3.5.0",
     "dayjs": "^1.11.2",
-    "gun": "^0.2020.1237",
+    "gun": "amark/gun",
     "react": "^18.1.0",
     "react-day-picker": "^8.0.5",
     "react-dom": "^18.1.0",
