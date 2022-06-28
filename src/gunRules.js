@@ -22,6 +22,11 @@ module.exports = {
           }
         }
       }
+    },
+    "messages":{
+      "$alias":{
+        "$message": { "type": "secret", "pub": "~{alias}/epub"}
+      }
 
     }
   }

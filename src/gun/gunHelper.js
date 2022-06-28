@@ -149,38 +149,40 @@ const gunHelper = (function() {
       return key;
     },
     load: async (path, cb, opt) => {
-      let load = async (path, decrypt = true) => {
-        let node = gunHelper.getNodeByPath(path);
-        return await new Promise((res, rej) => {
-          node.load(async data => {
-
-            //Load sometimes doesn't correcntly load children the part below ensures that everything is loaded correctly
-            let isObj = !!data && typeof data === 'object' &&  !Array.isArray(data)
-            if(isObj){
-              let entries = Object.entries(data);
-              for (let i = 0; i < entries.length; i++) {
-                const [key, val] = entries[i];
-                if (!!val && typeof val === 'object' &&  !Array.isArray(val) && !Object.keys(val).length){
-                  data[key] = await load(`${path}/${key}`, false);
-                }
-              }
+      let loadingSet = new Set();
+      let loadedMap = new Map();
+      let load = async (path) => {
+        let data = await gunHelper.onceAsync(path)
+        if(data?.["_"]) delete data["_"];
+        let isObj = !!data && typeof data === 'object' &&  !Array.isArray(data)
+        if(!isObj) return data;
+        await Promise.all(Object.entries(data).map(([key, val]) => {
+          return new Promise(async ( res, rej ) => {
+            let nodeKey = val?.["#"]
+            if (nodeKey && !loadingSet.has(nodeKey)){
+              loadingSet.add(nodeKey);
+              loadedMap.set(nodeKey, await load(nodeKey))
+              data[key] = loadedMap.get(nodeKey);
             }
-
-            //Decrypt data when all subparts are loaded
-            if(data && decrypt) {
-              let rule = getRulesForPath(path);
-
-              decryptByRule(rule, { ...data }, path, { ...data }).then(result => {
-                cb && cb(result)
-                res(result)
-              })
-            }
-            else res(data)
+            res();
           })
-        })
+        }))
+        return data;
       }
+      let data =  await load(path)
+      if(!data) return data;
+      let decryptedData = await new Promise((res, rej) => {
+        let isObj = !!data && typeof data === 'object' &&  !Array.isArray(data)
+        let rule = getRulesForPath(path);
+        let dataObj = isObj ? { ...data }: data
+        let dataObjCopy = isObj ? { ...data }: data
 
-      return load(gunHelper.cleanPath(path)) 
+        decryptByRule(rule, dataObj, path, dataObjCopy).then(result => {
+          cb && cb(result)
+          res(result)
+        })
+      })
+      return decryptedData;
     }
   };
 })();

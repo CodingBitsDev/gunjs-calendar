@@ -37,7 +37,6 @@ const CalendarDay = ({day, first, last, onClickFree, onClickHour}) => {
       let endMinute = (new Date(hour.endDay)).getMinutes()
       let affectedHours = hours.slice(startHour, endHour) 
 
-      console.log("###", startHour, endHour, affectedHours)
       let startRef = affectedHours[0].getRef()
       let endRef = affectedHours[affectedHours.length -1].getRef()
       // if(!startRef || !endRef) return;
