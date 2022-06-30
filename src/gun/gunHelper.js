@@ -158,6 +158,10 @@ const gunHelper = (function() {
         if(!isObj) return data;
         await Promise.all(Object.entries(data).map(([key, val]) => {
           return new Promise(async ( res, rej ) => {
+            if(!opt?.keepNull && val == null) {
+              delete data[key];
+              return res();
+            }
             let nodeKey = val?.["#"]
             if (nodeKey && !loadingSet.has(nodeKey)){
               loadingSet.add(nodeKey);
