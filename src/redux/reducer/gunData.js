@@ -83,11 +83,11 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
 
     gunHelper.on("_user/calendars", (calendars, gunKey, _msg, _ev) => {
     //Download Calendars
-      let removedCalendars = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && !val).map(([key]) => key)
-      let currentCalendars = thunkAPI.getState()?.gunData?.calendars;
-      if(removedCalendars.some(key => !!currentCalendars[key])) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars}));
 
       let calendarList = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && val).filter(Boolean)
+      let removedCalendars = Object.keys(thunkAPI.getState()?.gunData?.calendars).filter(key => !!calendarList[key])
+      if(removedCalendars.length) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars}));
+
       if(!calendarList.length) {
         thunkAPI.dispatch(createCalendar({name: "Main"}))
       }
@@ -118,11 +118,11 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
 
     gunHelper.on("_user/sharedCalendars", (calendars, gunKey, _msg, _ev) => {
       //Download Calendars
-      let removedCalendars = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && !val).map(([key]) => key)
-      let currentCalendars = thunkAPI.getState()?.gunData?.sharedCalendars;
-      if(removedCalendars.some(key => !!currentCalendars[key])) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars, shared: true}));
-
       let calendarList = Object.entries(calendars || {}).filter(([key, val]) => key != "_" && val).filter(Boolean)
+
+      let removedCalendars = Object.keys(thunkAPI.getState()?.gunData?.sharedCalendars).filter(key => !!calendarList[key])
+      if(removedCalendars.length) thunkAPI.dispatch(updateRemovedCalendars({removedCalendars, shared: true}));
+
       calendarList.forEach(async ([key, data]) => {
         if( !trackedCalendars.includes(key)){
           trackedCalendars.push(key)
@@ -135,7 +135,7 @@ export const initGunData = createAsyncThunk("gunData/initGunData", async (data, 
               thunkAPI.dispatch(calendarLoaded({ key, data }))
             }))
           }).debounce(1000)
-          gunHelper.on(`_user/calendars/${key}`, calendarListener)
+          gunHelper.on(`_user/sharedCalendars/${key}`, calendarListener)
         }
       });
 
