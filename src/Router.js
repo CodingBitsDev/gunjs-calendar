@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import useGunAuth from "./gun/hooks/useGunAuth";
+import { useGunAuth } from "gunhelper";
 import useOverlay from "./hooks/useOverlay";
 import AuthScreen from "./Screens/AuthScreen";
 import MainScreen from "./Screens/MainScreen";

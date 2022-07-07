@@ -5,9 +5,10 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import gunRules from './gunRules';
 
-import gunHelper from './gun/gunHelper';
+import gunHelper from 'gunhelper';
 gunHelper.appKey = "gun-calendar"
 gunHelper.rules = gunRules;
+gunHelper.changePeers(["/gun","https://gun.nilsr.me/gun", "https://gun-manhattan.herokuapp.com/gun"])
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

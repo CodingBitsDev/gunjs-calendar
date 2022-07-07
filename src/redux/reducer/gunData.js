@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import gunHelper, { gun } from '../../gun/gunHelper'
+import gunHelper from 'gunhelper'
 import { v4 as uuid } from 'uuid';
 import { SEA } from 'gun';
 

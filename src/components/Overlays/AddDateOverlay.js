@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DayPicker } from 'react-day-picker';
 import { useForm } from "react-hook-form";
-import useGunValue from "../../gun/hooks/useGunValue";
+import { useGunValue } from "gunhelper";
 import DaySelect from "../DaySelect/DaySelect";
 import Select from 'react-select'
 import { useSelector } from "react-redux";

@@ -1,5 +1,3 @@
-import {login, signUp, canRecall, recall} from "./gun/auth"
-
 import logo from './logo.svg';
 import './App.css';
 import Router from "./Router";

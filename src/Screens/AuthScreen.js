@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import PinForm from "../components/Auth/PinForm";
 import SignInForm from "../components/Auth/SignInForm";
 import SignUpForm from "../components/Auth/SignUpForm";
-import useGunAuth from "../gun/hooks/useGunAuth";
+import { useGunAuth } from "gunhelper";
 
 const AuthScreen = () => {
   let {isSignedIn, showPin, error, signIn, signUp, recall, resetError} = useGunAuth(true)

@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { onSignedIn } from '../gun/auth';
+import { onSignedIn } from 'gunhelper';
 
 import gunData, { initGunData } from "./reducer/gunData"
 
